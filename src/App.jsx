@@ -65,9 +65,15 @@ const App = () => {
 
       const rows = data.table.rows;
 
-      const foundUserRow = rows.find(
-        (row) => row.c?.[1]?.v === username && row.c?.[2]?.v === password
-      );
+      const foundUserRow = rows.find((row) => {
+        const rowUsername = row.c?.[1]?.v;
+        const rowPassword = row.c?.[2]?.v;
+
+        return (
+          String(rowUsername) === String(username) &&
+          String(rowPassword) === String(password)
+        );
+      });
 
       if (foundUserRow) {
 
