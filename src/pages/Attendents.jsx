@@ -1243,7 +1243,6 @@ const Attendance = () => {
     fetchAttendanceHistory();
   }, [currentUser, isAuthenticated]);
 
-
   const uploadImageToDrive = async (base64Image, fileName) => {
     try {
       const response = await fetch(APPS_SCRIPT_URL, {
@@ -1284,11 +1283,14 @@ const Attendance = () => {
       return;
     }
 
-    //     if ((formData.status === "IN" || formData.status === "OUT") && !cameraPhoto) {
-    //   showToast("Please capture a photo before submitting", "error");
-    //   setIsSubmitting(false);
-    //   return;
-    // }
+    if (
+      (formData.status === "IN" || formData.status === "OUT") &&
+      !formData.image
+    ) {
+      showToast("Please capture a photo before submitting", "error");
+      setIsSubmitting(false);
+      return;
+    }
 
     if (formData?.status === "IN") {
       const indata = attendance.filter((item) => item.status === "IN");
@@ -1604,7 +1606,7 @@ const Attendance = () => {
 
             {(formData.status === "IN" || formData.status === "OUT") && (
               <div className="flex space-x-2">
-                <label className="flex-1 flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition">
+                <label className="flex-1 hidden sm:flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition">
                   <Upload className="w-5 h-5 mr-2 text-gray-600" />
                   <span className="text-sm text-gray-600">Upload Image</span>
                   <input
