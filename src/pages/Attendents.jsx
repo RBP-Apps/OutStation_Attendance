@@ -9,6 +9,8 @@ import {
   XCircle,
   Clock,
   AlertTriangle,
+  Upload,
+  Camera,
 } from "lucide-react";
 import { AuthContext } from "../App";
 
@@ -27,9 +29,6 @@ const AttendanceSummaryCard = ({
     totalMispunch: 0,
     mispunchDetails: [],
   });
-
-
-
 
   // Helper function to check if a day is complete (next day has started or past cutoff)
   const isDayComplete = (dateStr) => {
@@ -884,14 +883,11 @@ const Attendance = () => {
 
   const { currentUser, isAuthenticated } = useContext(AuthContext);
 
-
-
-
-const [cameraPhoto, setCameraPhoto] = useState(null);
-const [showCamera, setShowCamera] = useState(false);
-const [stream, setStream] = useState(null);
-const videoRef = useRef(null);
-const canvasRef = useRef(null);
+  const [cameraPhoto, setCameraPhoto] = useState(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const [stream, setStream] = useState(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
 
   const salesPersonName = currentUser?.salesPersonName || "Unknown User";
   const userRole = currentUser?.role || "User";
@@ -899,6 +895,7 @@ const canvasRef = useRef(null);
   const SPREADSHEET_ID = "10coGuAVkdMNVUoX_L2HedehSb7d5lpgGQHTNjAZiGaQ";
   const APPS_SCRIPT_URL =
     "https://script.google.com/macros/s/AKfycbylk0DYGG9b3iru8zGT8e6yPmEEFShWppHX3YsAM9M_OUbogsHNtcdg3CZaL5Y35EHnkg/exec";
+  const FOLDER_ID = "1iPBMiuD5T_N_J-RC9uLc5CmwoeVsIyfl";
 
   const formatDateInput = (date) => {
     return date.toISOString().split("T")[0];
@@ -945,6 +942,7 @@ const canvasRef = useRef(null);
     startDate: formatDateInput(new Date()),
     endDate: "",
     reason: "",
+    image: "",
   });
 
   const showToast = (message, type = "success") => {
@@ -1246,48 +1244,30 @@ const canvasRef = useRef(null);
   }, [currentUser, isAuthenticated]);
 
 
+  const uploadImageToDrive = async (base64Image, fileName) => {
+    try {
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: new URLSearchParams({
+          action: "uploadCameraFile",
+          base64Data: base64Image,
+          fileName: fileName,
+          mimeType: "image/jpeg",
+          folderId: FOLDER_ID,
+        }),
+      });
 
-  const startCamera = async () => {
-  try {
-    const mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "user" } // "user" for front camera, "environment" for back camera
-    });
-    setStream(mediaStream);
-    setShowCamera(true);
-    if (videoRef.current) {
-      videoRef.current.srcObject = mediaStream;
+      const result = await response.json();
+      if (result.success && result.fileUrl) {
+        return result.fileUrl;
+      } else {
+        throw new Error(result.error || "File upload failed");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
     }
-  } catch (error) {
-    showToast("Failed to access camera", "error");
-  }
-};
-
-const capturePhoto = () => {
-  const canvas = canvasRef.current;
-  const video = videoRef.current;
-  
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  
-  const photoData = canvas.toDataURL('image/jpeg');
-  setCameraPhoto(photoData);
-  stopCamera();
-};
-
-const stopCamera = () => {
-  if (stream) {
-    stream.getTracks().forEach(track => track.stop());
-  }
-  setShowCamera(false);
-  setStream(null);
-};
-
-const retakePhoto = () => {
-  setCameraPhoto(null);
-  startCamera();
-};
-
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1304,12 +1284,11 @@ const retakePhoto = () => {
       return;
     }
 
-
-//     if ((formData.status === "IN" || formData.status === "OUT") && !cameraPhoto) {
-//   showToast("Please capture a photo before submitting", "error");
-//   setIsSubmitting(false);
-//   return;
-// }
+    //     if ((formData.status === "IN" || formData.status === "OUT") && !cameraPhoto) {
+    //   showToast("Please capture a photo before submitting", "error");
+    //   setIsSubmitting(false);
+    //   return;
+    // }
 
     if (formData?.status === "IN") {
       const indata = attendance.filter((item) => item.status === "IN");
@@ -1338,10 +1317,14 @@ const retakePhoto = () => {
 
     try {
       let currentLocation = null;
+
       try {
         currentLocation = await getCurrentLocation();
 
-        if ((formData.status === "IN" || formData.status === "OUT") && InFiled === "yes") {
+        if (
+          (formData.status === "IN" || formData.status === "OUT") &&
+          InFiled === "yes"
+        ) {
           const distance = calculateDistance(
             currentLocation.latitude,
             currentLocation.longitude,
@@ -1379,6 +1362,18 @@ const retakePhoto = () => {
 
       setIsGettingLocation(false);
 
+      let imageUrl = formData.image;
+      if (
+        formData.image &&
+        formData.image.startsWith("data:") &&
+        (formData.status === "IN" || formData.status === "OUT")
+      ) {
+        imageUrl = await uploadImageToDrive(
+          formData.image,
+          `product-${Date.now()}.jpg`
+        );
+      }
+
       const currentDate = new Date();
       const timestamp = formatDateTime(currentDate);
 
@@ -1404,13 +1399,20 @@ const retakePhoto = () => {
       rowData[7] = currentLocation.mapLink;
       rowData[8] = currentLocation.formattedAddress;
       rowData[9] = salesPersonName;
-      rowData[15] = cameraPhoto || "";
+      rowData[15] = imageUrl || "";
 
       const payload = {
         sheetName: "Attendance",
         action: "insert",
         rowData: JSON.stringify(rowData),
       };
+
+      // In your frontend handleSubmit function, before sending data:
+      console.log("🔄 Sending attendance data:");
+      console.log("Photo URL:", imageUrl);
+      console.log("Row data array:", rowData);
+      console.log("Row data length:", rowData.length);
+      console.log("Column P (index 15) value:", rowData[15]);
 
       const urlEncodedData = new URLSearchParams(payload);
 
@@ -1436,6 +1438,7 @@ const retakePhoto = () => {
           startDate: formatDateInput(new Date()),
           endDate: "",
           reason: "",
+          image: "",
         });
 
         setCameraPhoto(null);
@@ -1475,6 +1478,7 @@ const retakePhoto = () => {
           startDate: formatDateInput(new Date()),
           endDate: "",
           reason: "",
+          image: "",
         });
 
         setTimeout(async () => {
@@ -1539,18 +1543,16 @@ const retakePhoto = () => {
     );
   }
 
-
-
-  const handlePhotoCapture = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setCameraPhoto(reader.result); // Base64 string
-    };
-    reader.readAsDataURL(file);
-  }
-};
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, image: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-0 lg:p-8">
@@ -1575,7 +1577,6 @@ const retakePhoto = () => {
 
           <form onSubmit={handleSubmit} className="space-y-8 p-8">
             <div className="grid gap-6 lg:grid-cols-1">
-
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-700 mb-3">
                   Status
@@ -1601,69 +1602,39 @@ const retakePhoto = () => {
               </div>
             </div>
 
-           {(formData.status === "IN" || formData.status === "OUT") && (
-  <div className="space-y-2">
-    <label className="block text-sm font-semibold text-slate-700 mb-3">
-      Capture Photo (Required) *
-    </label>
-    
-    {!showCamera && !cameraPhoto && (
-      <button
-        type="button"
-        onClick={startCamera}
-        className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium"
-      >
-        📷 Open Camera
-      </button>
-    )}
-    
-    {showCamera && (
-      <div className="space-y-3">
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          className="w-full rounded-lg border-2 border-blue-500"
-        />
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={capturePhoto}
-            className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
-          >
-            📸 Capture
-          </button>
-          <button
-            type="button"
-            onClick={stopCamera}
-            className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
-          >
-            ✕ Cancel
-          </button>
-        </div>
-      </div>
-    )}
-    
-    {cameraPhoto && (
-      <div className="space-y-3">
-        <img 
-          src={cameraPhoto} 
-          alt="Captured" 
-          className="w-full max-w-sm rounded-lg border-2 border-green-500" 
-        />
-        <button
-          type="button"
-          onClick={retakePhoto}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-        >
-          🔄 Retake Photo
-        </button>
-      </div>
-    )}
-    
-    <canvas ref={canvasRef} style={{ display: 'none' }} />
-  </div>
-)}
+            {(formData.status === "IN" || formData.status === "OUT") && (
+              <div className="flex space-x-2">
+                <label className="flex-1 flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition">
+                  <Upload className="w-5 h-5 mr-2 text-gray-600" />
+                  <span className="text-sm text-gray-600">Upload Image</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e)}
+                    className="hidden"
+                  />
+                </label>
+                <label className="flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 transition cursor-pointer">
+                  <Camera className="w-5 h-5 mr-2" />
+                  Take Photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={(e) => handleImageUpload(e)}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            )}
+
+            {formData.image && (
+              <img
+                src={formData.image}
+                alt="Preview"
+                className="w-full h-32 object-cover rounded-lg"
+              />
+            )}
 
             {!showLeaveFields && (
               <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-100">
