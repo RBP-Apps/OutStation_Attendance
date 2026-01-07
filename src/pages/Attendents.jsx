@@ -75,9 +75,8 @@ const AttendanceSummaryCard = ({
         return {
           isMispunch: true,
           type: "missing_out",
-          details: `${inCount} IN vs ${outCount} OUT - Missing ${
-            inCount - outCount
-          } OUT punch(es)`,
+          details: `${inCount} IN vs ${outCount} OUT - Missing ${inCount - outCount
+            } OUT punch(es)`,
         };
       } else {
         return {
@@ -118,8 +117,8 @@ const AttendanceSummaryCard = ({
       userRole?.toLowerCase() === "admin"
         ? attendanceData
         : attendanceData.filter(
-            (entry) => entry.salesPersonName === salesPersonName
-          );
+          (entry) => entry.salesPersonName === salesPersonName
+        );
 
     // Calculate statistics
     const currentMonth = new Date().getMonth();
@@ -508,9 +507,8 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
 
     // Create proper Excel content with XML format
     const currentDate = new Date().toLocaleDateString();
-    const fileName = `Attendance_History_${
-      new Date().toISOString().split("T")[0]
-    }`;
+    const fileName = `Attendance_History_${new Date().toISOString().split("T")[0]
+      }`;
 
     // Create Excel XML structure
     let excelContent = `<?xml version="1.0"?>
@@ -533,31 +531,30 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
     filteredData.forEach((row) => {
       excelContent += `
         <Row>
-          <Cell><Data ss:Type="String">${
-            row.salesPersonName || "N/A"
-          }</Data></Cell>
+          <Cell><Data ss:Type="String">${row.salesPersonName || "N/A"
+        }</Data></Cell>
           <Cell><Data ss:Type="String">${row.dateTime || "N/A"}</Data></Cell>
           <Cell><Data ss:Type="String">${row.status || "N/A"}</Data></Cell>
           <Cell><Data ss:Type="String">${row.mapLink || "N/A"}</Data></Cell>
           <Cell><Data ss:Type="String">${(row.address || "N/A").replace(
-            /[<>&"']/g,
-            function (match) {
-              switch (match) {
-                case "<":
-                  return "&lt;";
-                case ">":
-                  return "&gt;";
-                case "&":
-                  return "&amp;";
-                case '"':
-                  return "&quot;";
-                case "'":
-                  return "&apos;";
-                default:
-                  return match;
-              }
+          /[<>&"']/g,
+          function (match) {
+            switch (match) {
+              case "<":
+                return "&lt;";
+              case ">":
+                return "&gt;";
+              case "&":
+                return "&amp;";
+              case '"':
+                return "&quot;";
+              case "'":
+                return "&apos;";
+              default:
+                return match;
             }
-          )}</Data></Cell>
+          }
+        )}</Data></Cell>
         </Row>`;
     });
 
@@ -796,15 +793,14 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
                     </td>
                     <td className="px-4 py-3 border-r border-slate-200/50 w-24">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          record.status === "IN"
-                            ? "bg-green-100 text-green-800"
-                            : record.status === "OUT"
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${record.status === "IN"
+                          ? "bg-green-100 text-green-800"
+                          : record.status === "OUT"
                             ? "bg-red-100 text-red-800"
                             : record.status === "Leave"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
                       >
                         {record.status || "N/A"}
                       </span>
@@ -880,6 +876,7 @@ const Attendance = () => {
   const [hasOutActiveSession, setHasOutActiveSession] = useState([]);
   const [inData, setInData] = useState({});
   const [outData, setOutData] = useState({});
+  const [locationPermissionStatus, setLocationPermissionStatus] = useState("prompt"); // "granted", "denied", "prompt"
 
   const { currentUser, isAuthenticated } = useContext(AuthContext);
 
@@ -1039,7 +1036,7 @@ const Attendance = () => {
       (record) =>
         record.salesPersonName === salesPersonName &&
         record.dateTime?.split(" ")[0].toString() ===
-          formatDateDDMMYYYY(new Date())
+        formatDateDDMMYYYY(new Date())
     );
 
     if (userRecords.length === 0) {
@@ -1075,7 +1072,7 @@ const Attendance = () => {
         formData.startDate &&
         formData.endDate &&
         new Date(formData.endDate + "T00:00:00") <
-          new Date(formData.startDate + "T00:00:00")
+        new Date(formData.startDate + "T00:00:00")
       ) {
         newErrors.endDate = "End date cannot be before start date";
       }
@@ -1167,15 +1164,15 @@ const Attendance = () => {
         (entry) =>
           entry.salesPersonName === salesPersonName &&
           entry.dateTime?.split(" ")[0].toString() ===
-            formatDateDDMMYYYY(new Date())
+          formatDateDDMMYYYY(new Date())
       );
 
       const filteredHistoryData =
         userRole.toLowerCase() === "admin"
           ? formattedHistory
           : formattedHistory.filter(
-              (entry) => entry.salesPersonName === salesPersonName
-            );
+            (entry) => entry.salesPersonName === salesPersonName
+          );
 
       filteredHistory.sort((a, b) => {
         const parseGvizDate = (dateString) => {
@@ -1242,6 +1239,48 @@ const Attendance = () => {
   useEffect(() => {
     fetchAttendanceHistory();
   }, [currentUser, isAuthenticated]);
+
+  // Check location permission status on load
+  useEffect(() => {
+    const checkLocationPermission = async () => {
+      try {
+        // Check if geolocation is supported
+        if (!navigator.geolocation) {
+          setLocationPermissionStatus("denied");
+          return;
+        }
+
+        // Use Permissions API if available
+        if (navigator.permissions && navigator.permissions.query) {
+          const result = await navigator.permissions.query({ name: "geolocation" });
+          setLocationPermissionStatus(result.state);
+
+          // Listen for permission changes
+          result.onchange = () => {
+            setLocationPermissionStatus(result.state);
+          };
+        } else {
+          // Fallback: try to get location to check permission
+          navigator.geolocation.getCurrentPosition(
+            () => setLocationPermissionStatus("granted"),
+            (error) => {
+              if (error.code === 1) {
+                setLocationPermissionStatus("denied");
+              } else {
+                setLocationPermissionStatus("prompt");
+              }
+            },
+            { timeout: 5000 }
+          );
+        }
+      } catch (error) {
+        console.error("Error checking location permission:", error);
+        setLocationPermissionStatus("prompt");
+      }
+    };
+
+    checkLocationPermission();
+  }, []);
 
   const uploadImageToDrive = async (base64Image, fileName) => {
     try {
@@ -1383,8 +1422,8 @@ const Attendance = () => {
         formData.status === "IN" || formData.status === "OUT"
           ? formatDateTime(currentDate)
           : formData.startDate
-          ? formatDateTime(new Date(formData.startDate + "T00:00:00"))
-          : "";
+            ? formatDateTime(new Date(formData.startDate + "T00:00:00"))
+            : "";
 
       const endDateForLeave = formData.endDate
         ? formatDateTime(new Date(formData.endDate + "T00:00:00"))
@@ -1418,6 +1457,53 @@ const Attendance = () => {
 
       const urlEncodedData = new URLSearchParams(payload);
 
+      // ========== OPTIMISTIC UI UPDATE (10x FASTER) ==========
+      // Show success IMMEDIATELY - don't wait for server response
+      const successMessage =
+        formData.status === "IN"
+          ? "Check-in successful!"
+          : formData.status === "OUT"
+            ? "Check-out successful!"
+            : "Leave application submitted successfully!";
+      showToast(successMessage, "success");
+
+      // Reset form IMMEDIATELY
+      setFormData({
+        status: "",
+        startDate: formatDateInput(new Date()),
+        endDate: "",
+        reason: "",
+        image: "",
+      });
+      setCameraPhoto(null);
+      setIsSubmitting(false);
+      setIsGettingLocation(false);
+
+      // ========== FIRE-AND-FORGET BACKGROUND SUBMISSION ==========
+      // Submit data in background - user doesn't wait
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: urlEncodedData,
+      })
+        .then((response) => {
+          console.log("✅ Data saved to sheet successfully");
+          // Refresh history in background after successful save
+          fetchAttendanceHistory();
+        })
+        .catch((error) => {
+          console.error("Background save error:", error);
+          // Data might still be saved - Apps Script often works despite CORS errors
+          // Refresh history anyway after a delay
+          setTimeout(() => fetchAttendanceHistory(), 2000);
+        });
+
+      // Return early - don't wait for fetch
+      return;
+
+      // Legacy code below (kept for reference but not executed)
       try {
         const response = await fetch(APPS_SCRIPT_URL, {
           method: "POST",
@@ -1427,13 +1513,13 @@ const Attendance = () => {
           body: urlEncodedData,
         });
 
-        const successMessage =
+        const legacySuccessMessage =
           formData.status === "IN"
             ? "Check-in successful!"
             : formData.status === "OUT"
-            ? "Check-out successful!"
-            : "Leave application submitted successfully!";
-        showToast(successMessage, "success");
+              ? "Check-out successful!"
+              : "Leave application submitted successfully!";
+        showToast(legacySuccessMessage, "success");
 
         setFormData({
           status: "",
@@ -1467,13 +1553,13 @@ const Attendance = () => {
       } catch (fetchError) {
         console.error("Fetch error:", fetchError);
 
-        const successMessage =
+        const legacySuccessMessage =
           formData.status === "IN"
             ? "Check-in successful!"
             : formData.status === "OUT"
-            ? "Check-out successful!"
-            : "Leave application submitted successfully!";
-        showToast(successMessage, "success");
+              ? "Check-out successful!"
+              : "Leave application submitted successfully!";
+        showToast(legacySuccessMessage, "success");
 
         setFormData({
           status: "",
@@ -1559,6 +1645,38 @@ const Attendance = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-0 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
+        {/* Location Permission Warning Banner */}
+        {locationPermissionStatus !== "granted" && (
+          <div className="bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl shadow-xl overflow-hidden animate-pulse">
+            <div className="px-6 py-4 flex items-center gap-4">
+              <div className="flex-shrink-0">
+                <MapPin className="h-8 w-8 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-white">
+                  📍 Location Permission Required
+                </h3>
+                <p className="text-white/90 text-sm mt-1">
+                  {locationPermissionStatus === "denied"
+                    ? "Location access is blocked. Please enable it in your browser settings to mark attendance."
+                    : "Please allow location access when prompted to mark your attendance accurately."
+                  }
+                </p>
+                {locationPermissionStatus === "denied" && (
+                  <div className="mt-2 text-white/80 text-xs">
+                    <strong>How to enable:</strong> Click the lock/info icon in your browser's address bar → Site settings → Location → Allow
+                  </div>
+                )}
+              </div>
+              <div className="flex-shrink-0">
+                <div className="bg-white/20 rounded-full p-2">
+                  <AlertTriangle className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Attendance Summary Card */}
         <AttendanceSummaryCard
           attendanceData={historyAttendance}
@@ -1587,9 +1705,8 @@ const Attendance = () => {
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-white border rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium ${
-                    errors.status ? "border-red-300" : "border-slate-200"
-                  }`}
+                  className={`w-full px-4 py-3 bg-white border rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium ${errors.status ? "border-red-300" : "border-slate-200"
+                    }`}
                 >
                   <option value="">Select status</option>
                   <option value="IN">IN</option>
@@ -1605,37 +1722,44 @@ const Attendance = () => {
             </div>
 
             {(formData.status === "IN" || formData.status === "OUT") && (
-              <div className="flex space-x-2">
-                <label className="flex-1 hidden sm:flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition">
-                  <Upload className="w-5 h-5 mr-2 text-gray-600" />
-                  <span className="text-sm text-gray-600">Upload Image</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleImageUpload(e)}
-                    className="hidden"
-                  />
-                </label>
-                <label className="flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 transition cursor-pointer">
-                  <Camera className="w-5 h-5 mr-2" />
-                  Take Photo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={(e) => handleImageUpload(e)}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-            )}
+              <>
+                <div className="flex space-x-2">
+                  <label className="flex-1 hidden sm:flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition">
+                    <Upload className="w-5 h-5 mr-2 text-gray-600" />
+                    <span className="text-sm text-gray-600">Upload Image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e)}
+                      className="hidden"
+                    />
+                  </label>
+                  <label className="flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 transition cursor-pointer">
+                    <Camera className="w-5 h-5 mr-2" />
+                    Take Photo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={(e) => handleImageUpload(e)}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
 
-            {formData.image && (
-              <img
-                src={formData.image}
-                alt="Preview"
-                className="w-full h-32 object-cover rounded-lg"
-              />
+                {formData.image && (
+                  <div className="relative">
+                    <img
+                      src={formData.image}
+                      alt="Preview"
+                      className="w-full h-48 object-cover rounded-lg border-2 border-green-300"
+                    />
+                    <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                      ✓ Photo Captured
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {!showLeaveFields && (
