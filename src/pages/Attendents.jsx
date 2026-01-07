@@ -75,8 +75,9 @@ const AttendanceSummaryCard = ({
         return {
           isMispunch: true,
           type: "missing_out",
-          details: `${inCount} IN vs ${outCount} OUT - Missing ${inCount - outCount
-            } OUT punch(es)`,
+          details: `${inCount} IN vs ${outCount} OUT - Missing ${
+            inCount - outCount
+          } OUT punch(es)`,
         };
       } else {
         return {
@@ -117,8 +118,8 @@ const AttendanceSummaryCard = ({
       userRole?.toLowerCase() === "admin"
         ? attendanceData
         : attendanceData.filter(
-          (entry) => entry.salesPersonName === salesPersonName
-        );
+            (entry) => entry.salesPersonName === salesPersonName
+          );
 
     // Calculate statistics
     const currentMonth = new Date().getMonth();
@@ -244,13 +245,13 @@ const AttendanceSummaryCard = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden mb-8">
-        <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 px-8 py-6">
+      <div className="mb-8 overflow-hidden border shadow-xl bg-white/80 backdrop-blur-sm rounded-2xl border-white/20">
+        <div className="px-8 py-6 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500">
           <h2 className="text-2xl font-bold text-white">Attendance Summary</h2>
           <p className="text-blue-50">Loading your attendance statistics...</p>
         </div>
         <div className="p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 border-indigo-600 rounded-full animate-spin"></div>
           <p className="text-slate-600">Loading attendance summary...</p>
         </div>
       </div>
@@ -258,10 +259,10 @@ const AttendanceSummaryCard = ({
   }
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden mb-8">
-      <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 px-8 py-6">
+    <div className="mb-8 overflow-hidden border shadow-xl bg-white/80 backdrop-blur-sm rounded-2xl border-white/20">
+      <div className="px-8 py-6 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500">
         <div className="flex items-center gap-3 mb-2">
-          <Calendar className="h-6 w-6 text-white" />
+          <Calendar className="w-6 h-6 text-white" />
           <h2 className="text-2xl font-bold text-white">
             {userRole?.toLowerCase() === "admin"
               ? "Overall Attendance Summary"
@@ -276,13 +277,13 @@ const AttendanceSummaryCard = ({
       </div>
 
       <div className="p-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
           {/* Total Present Days */}
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+          <div className="p-6 text-center transition-shadow border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl hover:shadow-lg">
             <div className="flex justify-center mb-3">
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
-            <div className="text-3xl font-bold text-green-700 mb-1">
+            <div className="mb-1 text-3xl font-bold text-green-700">
               {summaryData.totalPresent}
             </div>
             <div className="text-sm font-medium text-green-600">
@@ -291,44 +292,44 @@ const AttendanceSummaryCard = ({
           </div>
 
           {/* Total Leave Days */}
-          <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+          <div className="p-6 text-center transition-shadow border bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200 rounded-xl hover:shadow-lg">
             <div className="flex justify-center mb-3">
-              <XCircle className="h-8 w-8 text-amber-600" />
+              <XCircle className="w-8 h-8 text-amber-600" />
             </div>
-            <div className="text-3xl font-bold text-amber-700 mb-1">
+            <div className="mb-1 text-3xl font-bold text-amber-700">
               {summaryData.totalLeave}
             </div>
             <div className="text-sm font-medium text-amber-600">Leave Days</div>
           </div>
 
           {/* Total IN */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+          <div className="p-6 text-center transition-shadow border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl hover:shadow-lg">
             <div className="flex justify-center mb-3">
-              <Clock className="h-8 w-8 text-blue-600" />
+              <Clock className="w-8 h-8 text-blue-600" />
             </div>
-            <div className="text-3xl font-bold text-blue-700 mb-1">
+            <div className="mb-1 text-3xl font-bold text-blue-700">
               {summaryData.totalIn}
             </div>
             <div className="text-sm font-medium text-blue-600">Total IN</div>
           </div>
 
           {/* Total OUT */}
-          <div className="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+          <div className="p-6 text-center transition-shadow border border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl hover:shadow-lg">
             <div className="flex justify-center mb-3">
-              <Clock className="h-8 w-8 text-purple-600" />
+              <Clock className="w-8 h-8 text-purple-600" />
             </div>
-            <div className="text-3xl font-bold text-purple-700 mb-1">
+            <div className="mb-1 text-3xl font-bold text-purple-700">
               {summaryData.totalOut}
             </div>
             <div className="text-sm font-medium text-purple-600">Total OUT</div>
           </div>
 
           {/* Total Mispunch */}
-          <div className="bg-gradient-to-br from-red-50 to-rose-50 border border-red-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
+          <div className="p-6 text-center transition-shadow border border-red-200 bg-gradient-to-br from-red-50 to-rose-50 rounded-xl hover:shadow-lg">
             <div className="flex justify-center mb-3">
-              <AlertTriangle className="h-8 w-8 text-red-600" />
+              <AlertTriangle className="w-8 h-8 text-red-600" />
             </div>
-            <div className="text-3xl font-bold text-red-700 mb-1">
+            <div className="mb-1 text-3xl font-bold text-red-700">
               {summaryData.totalMispunch}
             </div>
             <div className="text-sm font-medium text-red-600">Mispunch</div>
@@ -337,9 +338,9 @@ const AttendanceSummaryCard = ({
 
         {/* Mispunch Details Section */}
         {summaryData.mispunchDetails.length > 0 && (
-          <div className="mt-8 bg-red-50/50 rounded-xl p-6 border border-red-200">
+          <div className="p-6 mt-8 border border-red-200 bg-red-50/50 rounded-xl">
             <div className="flex items-center gap-2 mb-4">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <AlertTriangle className="w-5 h-5 text-red-600" />
               <h3 className="text-lg font-semibold text-red-800">
                 Mispunch Details
               </h3>
@@ -348,9 +349,9 @@ const AttendanceSummaryCard = ({
               {summaryData.mispunchDetails.map((detail, index) => (
                 <div
                   key={index}
-                  className="bg-white/60 rounded-lg p-4 border border-red-200"
+                  className="p-4 border border-red-200 rounded-lg bg-white/60"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex-1">
                       <div className="font-medium text-red-800">
                         {userRole?.toLowerCase() === "admin"
@@ -358,10 +359,10 @@ const AttendanceSummaryCard = ({
                           : ""}
                         {detail.date}
                       </div>
-                      <div className="text-sm text-red-600 mt-1">
+                      <div className="mt-1 text-sm text-red-600">
                         {detail.details}
                       </div>
-                      <div className="text-xs text-red-500 mt-1">
+                      <div className="mt-1 text-xs text-red-500">
                         {detail.type === "missing_out" &&
                           "Day completed - Missing OUT punch(es)"}
                         {detail.type === "invalid" && "Invalid punch sequence"}
@@ -371,10 +372,10 @@ const AttendanceSummaryCard = ({
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded font-medium">
+                      <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded">
                         IN: {detail.inCount}
                       </span>
-                      <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded font-medium">
+                      <span className="px-2 py-1 text-xs font-medium text-purple-800 bg-purple-100 rounded">
                         OUT: {detail.outCount}
                       </span>
                     </div>
@@ -386,8 +387,8 @@ const AttendanceSummaryCard = ({
         )}
 
         {/* Additional Info */}
-        <div className="mt-6 bg-slate-50/50 rounded-lg p-4">
-          <div className="text-sm text-slate-600 text-center">
+        <div className="p-4 mt-6 rounded-lg bg-slate-50/50">
+          <div className="text-sm text-center text-slate-600">
             <span className="font-medium">Current Month:</span>{" "}
             {new Date().toLocaleDateString("en-US", {
               month: "long",
@@ -507,8 +508,9 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
 
     // Create proper Excel content with XML format
     const currentDate = new Date().toLocaleDateString();
-    const fileName = `Attendance_History_${new Date().toISOString().split("T")[0]
-      }`;
+    const fileName = `Attendance_History_${
+      new Date().toISOString().split("T")[0]
+    }`;
 
     // Create Excel XML structure
     let excelContent = `<?xml version="1.0"?>
@@ -531,30 +533,31 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
     filteredData.forEach((row) => {
       excelContent += `
         <Row>
-          <Cell><Data ss:Type="String">${row.salesPersonName || "N/A"
-        }</Data></Cell>
+          <Cell><Data ss:Type="String">${
+            row.salesPersonName || "N/A"
+          }</Data></Cell>
           <Cell><Data ss:Type="String">${row.dateTime || "N/A"}</Data></Cell>
           <Cell><Data ss:Type="String">${row.status || "N/A"}</Data></Cell>
           <Cell><Data ss:Type="String">${row.mapLink || "N/A"}</Data></Cell>
           <Cell><Data ss:Type="String">${(row.address || "N/A").replace(
-          /[<>&"']/g,
-          function (match) {
-            switch (match) {
-              case "<":
-                return "&lt;";
-              case ">":
-                return "&gt;";
-              case "&":
-                return "&amp;";
-              case '"':
-                return "&quot;";
-              case "'":
-                return "&apos;";
-              default:
-                return match;
+            /[<>&"']/g,
+            function (match) {
+              switch (match) {
+                case "<":
+                  return "&lt;";
+                case ">":
+                  return "&gt;";
+                case "&":
+                  return "&amp;";
+                case '"':
+                  return "&quot;";
+                case "'":
+                  return "&apos;";
+                default:
+                  return match;
+              }
             }
-          }
-        )}</Data></Cell>
+          )}</Data></Cell>
         </Row>`;
     });
 
@@ -603,13 +606,13 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
 
   if (isLoading) {
     return (
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden mt-8">
-        <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 px-8 py-6">
+      <div className="mt-8 overflow-hidden border shadow-xl bg-white/80 backdrop-blur-sm rounded-2xl border-white/20">
+        <div className="px-8 py-6 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500">
           <h2 className="text-2xl font-bold text-white">Attendance History</h2>
           <p className="text-blue-50">Loading your attendance records...</p>
         </div>
         <div className="p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 border-indigo-600 rounded-full animate-spin"></div>
           <p className="text-slate-600">Loading attendance history...</p>
         </div>
       </div>
@@ -617,10 +620,10 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
   }
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden mt-8">
+    <div className="mt-8 overflow-hidden border shadow-xl bg-white/80 backdrop-blur-sm rounded-2xl border-white/20">
       {/* Header with Filters and Download */}
-      <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 px-8 py-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+      <div className="px-8 py-6 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500">
+        <div className="flex flex-col gap-4 mb-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">
               Attendance History
@@ -633,10 +636,10 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
             <div className="flex gap-2">
               <button
                 onClick={downloadExcel}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg border border-green-500 transition-colors shadow-md"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-white transition-colors bg-green-600 border border-green-500 rounded-lg shadow-md hover:bg-green-700"
                 title="Download as Excel"
               >
-                <Download className="h-4 w-4" />
+                <Download className="w-4 h-4" />
                 Download
               </button>
             </div>
@@ -645,16 +648,16 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
 
         {/* Filters Row - Only show for admin */}
         {userRole?.toLowerCase() === "admin" && (
-          <div className="grid gap-3 md:grid-cols-4 items-end">
+          <div className="grid items-end gap-3 md:grid-cols-4">
             {/* Name Filter */}
             <div>
-              <label className="block text-sm font-medium text-blue-100 mb-1">
+              <label className="block mb-1 text-sm font-medium text-blue-100">
                 Filter by Name
               </label>
               <select
                 value={filters.name}
                 onChange={(e) => handleFilterChange("name", e.target.value)}
-                className="w-full px-3 py-2 bg-white/90 border border-white/30 rounded-lg text-slate-700 text-sm focus:ring-2 focus:ring-white/50 focus:border-white/50"
+                className="w-full px-3 py-2 text-sm border rounded-lg bg-white/90 border-white/30 text-slate-700 focus:ring-2 focus:ring-white/50 focus:border-white/50"
               >
                 <option value="">All Names</option>
                 {getUniqueNames(attendanceData || []).map((name) => (
@@ -667,13 +670,13 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
 
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium text-blue-100 mb-1">
+              <label className="block mb-1 text-sm font-medium text-blue-100">
                 Filter by Status
               </label>
               <select
                 value={filters.status}
                 onChange={(e) => handleFilterChange("status", e.target.value)}
-                className="w-full px-3 py-2 bg-white/90 border border-white/30 rounded-lg text-slate-700 text-sm focus:ring-2 focus:ring-white/50 focus:border-white/50"
+                className="w-full px-3 py-2 text-sm border rounded-lg bg-white/90 border-white/30 text-slate-700 focus:ring-2 focus:ring-white/50 focus:border-white/50"
               >
                 <option value="">All Status</option>
                 <option value="IN">IN</option>
@@ -684,13 +687,13 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
 
             {/* Month Filter */}
             <div>
-              <label className="block text-sm font-medium text-blue-100 mb-1">
+              <label className="block mb-1 text-sm font-medium text-blue-100">
                 Filter by Month
               </label>
               <select
                 value={filters.month}
                 onChange={(e) => handleFilterChange("month", e.target.value)}
-                className="w-full px-3 py-2 bg-white/90 border border-white/30 rounded-lg text-slate-700 text-sm focus:ring-2 focus:ring-white/50 focus:border-white/50"
+                className="w-full px-3 py-2 text-sm border rounded-lg bg-white/90 border-white/30 text-slate-700 focus:ring-2 focus:ring-white/50 focus:border-white/50"
               >
                 <option value="">All Months</option>
                 {getAvailableMonths(attendanceData || []).map((monthYear) => (
@@ -706,7 +709,7 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="w-full px-3 py-2 bg-white/20 hover:bg-white/30 text-white text-sm rounded-lg border border-white/30 transition-colors"
+                  className="w-full px-3 py-2 text-sm text-white transition-colors border rounded-lg bg-white/20 hover:bg-white/30 border-white/30"
                 >
                   Clear Filters
                 </button>
@@ -717,7 +720,7 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
 
         {/* Filter Results Info */}
         {hasActiveFilters && (
-          <div className="mt-3 bg-white/10 border border-white/20 rounded-lg p-3">
+          <div className="p-3 mt-3 border rounded-lg bg-white/10 border-white/20">
             <p className="text-sm text-blue-100">
               Showing {filteredData.length} of {attendanceData?.length || 0}{" "}
               records
@@ -733,8 +736,8 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
       <div className="overflow-x-auto">
         {!attendanceData || attendanceData.length === 0 ? (
           <div className="p-8 text-center">
-            <div className="text-slate-400 text-lg mb-2">📊</div>
-            <h3 className="text-lg font-semibold text-slate-600 mb-2">
+            <div className="mb-2 text-lg text-slate-400">📊</div>
+            <h3 className="mb-2 text-lg font-semibold text-slate-600">
               No Records Found
             </h3>
             <p className="text-slate-500">
@@ -745,8 +748,8 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
           </div>
         ) : filteredData.length === 0 && hasActiveFilters ? (
           <div className="p-8 text-center">
-            <div className="text-slate-400 text-lg mb-2">🔍</div>
-            <h3 className="text-lg font-semibold text-slate-600 mb-2">
+            <div className="mb-2 text-lg text-slate-400">🔍</div>
+            <h3 className="mb-2 text-lg font-semibold text-slate-600">
               No Matching Records
             </h3>
             <p className="text-slate-500">
@@ -756,21 +759,21 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
         ) : (
           <div className="min-w-full">
             <table className="w-full border-collapse">
-              <thead className="bg-slate-50/50 border-b border-slate-200/50">
+              <thead className="border-b bg-slate-50/50 border-slate-200/50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200/50 w-32">
+                  <th className="w-32 px-4 py-3 text-xs font-semibold tracking-wider text-left uppercase border-r text-slate-600 border-slate-200/50">
                     Name
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200/50 w-40">
+                  <th className="w-40 px-4 py-3 text-xs font-semibold tracking-wider text-left uppercase border-r text-slate-600 border-slate-200/50">
                     Date & Time
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200/50 w-24">
+                  <th className="w-24 px-4 py-3 text-xs font-semibold tracking-wider text-left uppercase border-r text-slate-600 border-slate-200/50">
                     Status
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-r border-slate-200/50 w-32">
+                  <th className="w-32 px-4 py-3 text-xs font-semibold tracking-wider text-left uppercase border-r text-slate-600 border-slate-200/50">
                     Map Link
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">
                     Address
                   </th>
                 </tr>
@@ -779,50 +782,51 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
                 {filteredData.map((record, index) => (
                   <tr
                     key={index}
-                    className="hover:bg-slate-50/30 transition-colors border-b border-slate-200/30"
+                    className="transition-colors border-b hover:bg-slate-50/30 border-slate-200/30"
                   >
-                    <td className="px-4 py-3 border-r border-slate-200/50 w-32">
-                      <div className="text-sm font-medium text-slate-900 break-words">
+                    <td className="w-32 px-4 py-3 border-r border-slate-200/50">
+                      <div className="text-sm font-medium break-words text-slate-900">
                         {record.salesPersonName || "N/A"}
                       </div>
                     </td>
-                    <td className="px-4 py-3 border-r border-slate-200/50 w-40">
-                      <div className="text-sm text-slate-900 break-words">
+                    <td className="w-40 px-4 py-3 border-r border-slate-200/50">
+                      <div className="text-sm break-words text-slate-900">
                         {record.dateTime || "N/A"}
                       </div>
                     </td>
-                    <td className="px-4 py-3 border-r border-slate-200/50 w-24">
+                    <td className="w-24 px-4 py-3 border-r border-slate-200/50">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${record.status === "IN"
-                          ? "bg-green-100 text-green-800"
-                          : record.status === "OUT"
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          record.status === "IN"
+                            ? "bg-green-100 text-green-800"
+                            : record.status === "OUT"
                             ? "bg-red-100 text-red-800"
                             : record.status === "Leave"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
                       >
                         {record.status || "N/A"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 border-r border-slate-200/50 w-32">
+                    <td className="w-32 px-4 py-3 border-r border-slate-200/50">
                       {record.mapLink ? (
                         <a
                           href={record.mapLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm break-all"
+                          className="flex items-center gap-1 text-sm text-blue-600 break-all hover:text-blue-800"
                         >
-                          <MapPin className="h-4 w-4 flex-shrink-0" />
+                          <MapPin className="flex-shrink-0 w-4 h-4" />
                           <span className="truncate">View Map</span>
                         </a>
                       ) : (
-                        <span className="text-slate-400 text-sm">N/A</span>
+                        <span className="text-sm text-slate-400">N/A</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
                       <div
-                        className="text-sm text-slate-600 break-words max-w-md"
+                        className="max-w-md text-sm break-words text-slate-600"
                         title={record.address}
                       >
                         {record.address || "N/A"}
@@ -876,7 +880,8 @@ const Attendance = () => {
   const [hasOutActiveSession, setHasOutActiveSession] = useState([]);
   const [inData, setInData] = useState({});
   const [outData, setOutData] = useState({});
-  const [locationPermissionStatus, setLocationPermissionStatus] = useState("prompt"); // "granted", "denied", "prompt"
+  const [locationPermissionStatus, setLocationPermissionStatus] =
+    useState("prompt"); // "granted", "denied", "prompt"
 
   const { currentUser, isAuthenticated } = useContext(AuthContext);
 
@@ -1036,7 +1041,7 @@ const Attendance = () => {
       (record) =>
         record.salesPersonName === salesPersonName &&
         record.dateTime?.split(" ")[0].toString() ===
-        formatDateDDMMYYYY(new Date())
+          formatDateDDMMYYYY(new Date())
     );
 
     if (userRecords.length === 0) {
@@ -1072,7 +1077,7 @@ const Attendance = () => {
         formData.startDate &&
         formData.endDate &&
         new Date(formData.endDate + "T00:00:00") <
-        new Date(formData.startDate + "T00:00:00")
+          new Date(formData.startDate + "T00:00:00")
       ) {
         newErrors.endDate = "End date cannot be before start date";
       }
@@ -1164,15 +1169,15 @@ const Attendance = () => {
         (entry) =>
           entry.salesPersonName === salesPersonName &&
           entry.dateTime?.split(" ")[0].toString() ===
-          formatDateDDMMYYYY(new Date())
+            formatDateDDMMYYYY(new Date())
       );
 
       const filteredHistoryData =
         userRole.toLowerCase() === "admin"
           ? formattedHistory
           : formattedHistory.filter(
-            (entry) => entry.salesPersonName === salesPersonName
-          );
+              (entry) => entry.salesPersonName === salesPersonName
+            );
 
       filteredHistory.sort((a, b) => {
         const parseGvizDate = (dateString) => {
@@ -1252,7 +1257,9 @@ const Attendance = () => {
 
         // Use Permissions API if available
         if (navigator.permissions && navigator.permissions.query) {
-          const result = await navigator.permissions.query({ name: "geolocation" });
+          const result = await navigator.permissions.query({
+            name: "geolocation",
+          });
           setLocationPermissionStatus(result.state);
 
           // Listen for permission changes
@@ -1422,8 +1429,8 @@ const Attendance = () => {
         formData.status === "IN" || formData.status === "OUT"
           ? formatDateTime(currentDate)
           : formData.startDate
-            ? formatDateTime(new Date(formData.startDate + "T00:00:00"))
-            : "";
+          ? formatDateTime(new Date(formData.startDate + "T00:00:00"))
+          : "";
 
       const endDateForLeave = formData.endDate
         ? formatDateTime(new Date(formData.endDate + "T00:00:00"))
@@ -1463,8 +1470,8 @@ const Attendance = () => {
         formData.status === "IN"
           ? "Check-in successful!"
           : formData.status === "OUT"
-            ? "Check-out successful!"
-            : "Leave application submitted successfully!";
+          ? "Check-out successful!"
+          : "Leave application submitted successfully!";
       showToast(successMessage, "success");
 
       // Reset form IMMEDIATELY
@@ -1517,8 +1524,8 @@ const Attendance = () => {
           formData.status === "IN"
             ? "Check-in successful!"
             : formData.status === "OUT"
-              ? "Check-out successful!"
-              : "Leave application submitted successfully!";
+            ? "Check-out successful!"
+            : "Leave application submitted successfully!";
         showToast(legacySuccessMessage, "success");
 
         setFormData({
@@ -1557,8 +1564,8 @@ const Attendance = () => {
           formData.status === "IN"
             ? "Check-in successful!"
             : formData.status === "OUT"
-              ? "Check-out successful!"
-              : "Leave application submitted successfully!";
+            ? "Check-out successful!"
+            : "Leave application submitted successfully!";
         showToast(legacySuccessMessage, "success");
 
         setFormData({
@@ -1618,10 +1625,10 @@ const Attendance = () => {
 
   if (!isAuthenticated || !currentUser || !currentUser.salesPersonName) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-          <p className="text-slate-600 font-medium">
+          <div className="w-12 h-12 mx-auto mb-4 border-b-2 border-red-600 rounded-full animate-spin"></div>
+          <p className="font-medium text-slate-600">
             {!isAuthenticated
               ? "Please log in to view this page."
               : "Loading user data..."}
@@ -1633,44 +1640,58 @@ const Attendance = () => {
 
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, image: reader.result });
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    // Reset the input value to allow re-selecting the same file
+    e.target.value = "";
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      // Use callback-based setState to avoid stale closure issues on mobile
+      setFormData((prev) => ({ ...prev, image: reader.result }));
+      // Also set camera photo as backup
+      setCameraPhoto(reader.result);
+    };
+
+    reader.onerror = () => {
+      console.error("Error reading file:", reader.error);
+      showToast("Failed to read image. Please try again.", "error");
+    };
+
+    reader.readAsDataURL(file);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-0 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen p-0 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 lg:p-8">
+      <div className="mx-auto space-y-8 max-w-7xl">
         {/* Location Permission Warning Banner */}
         {locationPermissionStatus !== "granted" && (
-          <div className="bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl shadow-xl overflow-hidden animate-pulse">
-            <div className="px-6 py-4 flex items-center gap-4">
+          <div className="overflow-hidden shadow-xl bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl animate-pulse">
+            <div className="flex items-center gap-4 px-6 py-4">
               <div className="flex-shrink-0">
-                <MapPin className="h-8 w-8 text-white" />
+                <MapPin className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-white">
                   📍 Location Permission Required
                 </h3>
-                <p className="text-white/90 text-sm mt-1">
+                <p className="mt-1 text-sm text-white/90">
                   {locationPermissionStatus === "denied"
                     ? "Location access is blocked. Please enable it in your browser settings to mark attendance."
-                    : "Please allow location access when prompted to mark your attendance accurately."
-                  }
+                    : "Please allow location access when prompted to mark your attendance accurately."}
                 </p>
                 {locationPermissionStatus === "denied" && (
-                  <div className="mt-2 text-white/80 text-xs">
-                    <strong>How to enable:</strong> Click the lock/info icon in your browser's address bar → Site settings → Location → Allow
+                  <div className="mt-2 text-xs text-white/80">
+                    <strong>How to enable:</strong> Click the lock/info icon in
+                    your browser's address bar → Site settings → Location →
+                    Allow
                   </div>
                 )}
               </div>
               <div className="flex-shrink-0">
-                <div className="bg-white/20 rounded-full p-2">
-                  <AlertTriangle className="h-6 w-6 text-white" />
+                <div className="p-2 rounded-full bg-white/20">
+                  <AlertTriangle className="w-6 h-6 text-white" />
                 </div>
               </div>
             </div>
@@ -1685,28 +1706,29 @@ const Attendance = () => {
           salesPersonName={salesPersonName}
         />
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 px-8 py-6">
-            <h3 className="text-2xl font-bold text-white mb-2">
+        <div className="overflow-hidden border shadow-xl bg-white/80 backdrop-blur-sm rounded-2xl border-white/20">
+          <div className="px-8 py-6 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500">
+            <h3 className="mb-2 text-2xl font-bold text-white">
               Mark Attendance
             </h3>
-            <p className="text-emerald-50 text-lg">
+            <p className="text-lg text-emerald-50">
               Record your daily attendance or apply for leave
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8 p-8">
+          <form onSubmit={handleSubmit} className="p-8 space-y-8">
             <div className="grid gap-6 lg:grid-cols-1">
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-slate-700 mb-3">
+                <label className="block mb-3 text-sm font-semibold text-slate-700">
                   Status
                 </label>
                 <select
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-white border rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium ${errors.status ? "border-red-300" : "border-slate-200"
-                    }`}
+                  className={`w-full px-4 py-3 bg-white border rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium ${
+                    errors.status ? "border-red-300" : "border-slate-200"
+                  }`}
                 >
                   <option value="">Select status</option>
                   <option value="IN">IN</option>
@@ -1714,7 +1736,7 @@ const Attendance = () => {
                   <option value="Leave">Leave</option>
                 </select>
                 {errors.status && (
-                  <p className="text-red-500 text-sm mt-2 font-medium">
+                  <p className="mt-2 text-sm font-medium text-red-500">
                     {errors.status}
                   </p>
                 )}
@@ -1724,7 +1746,7 @@ const Attendance = () => {
             {(formData.status === "IN" || formData.status === "OUT") && (
               <>
                 <div className="flex space-x-2">
-                  <label className="flex-1 hidden sm:flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition">
+                  <label className="items-center justify-center flex-1 hidden px-4 py-2 transition border-2 border-gray-300 border-dashed rounded-lg cursor-pointer sm:flex hover:border-blue-500">
                     <Upload className="w-5 h-5 mr-2 text-gray-600" />
                     <span className="text-sm text-gray-600">Upload Image</span>
                     <input
@@ -1734,7 +1756,7 @@ const Attendance = () => {
                       className="hidden"
                     />
                   </label>
-                  <label className="flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 transition cursor-pointer">
+                  <label className="flex items-center justify-center px-4 py-2 text-blue-600 transition border border-blue-200 rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100">
                     <Camera className="w-5 h-5 mr-2" />
                     Take Photo
                     <input
@@ -1752,9 +1774,9 @@ const Attendance = () => {
                     <img
                       src={formData.image}
                       alt="Preview"
-                      className="w-full h-48 object-cover rounded-lg border-2 border-green-300"
+                      className="object-cover w-full h-48 border-2 border-green-300 rounded-lg"
                     />
-                    <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                    <div className="absolute px-2 py-1 text-xs font-medium text-white bg-green-500 rounded-full top-2 right-2">
                       ✓ Photo Captured
                     </div>
                   </div>
@@ -1763,11 +1785,11 @@ const Attendance = () => {
             )}
 
             {!showLeaveFields && (
-              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-100">
-                <div className="text-sm font-semibold text-emerald-700 mb-2">
+              <div className="p-6 border bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border-emerald-100">
+                <div className="mb-2 text-sm font-semibold text-emerald-700">
                   Current Date & Time
                 </div>
-                <div className="text-sm sm:text-2xl font-bold text-emerald-800">
+                <div className="text-sm font-bold sm:text-2xl text-emerald-800">
                   {formatDateDisplay(new Date())}
                 </div>
                 {(formData.status === "IN" || formData.status === "OUT") && (
@@ -1779,8 +1801,8 @@ const Attendance = () => {
             )}
 
             {showLeaveFields && (
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-0 sm:p-6 border border-amber-100 mb-6">
-                <div className="text-sm font-semibold text-amber-700 mb-2">
+              <div className="p-0 mb-6 border bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl sm:p-6 border-amber-100">
+                <div className="mb-2 text-sm font-semibold text-amber-700">
                   Leave Application
                 </div>
                 <div className="text-lg font-bold text-amber-800">
@@ -1796,7 +1818,7 @@ const Attendance = () => {
               <div className="space-y-6">
                 <div className="grid gap-6 lg:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-slate-700 mb-3">
+                    <label className="block mb-3 text-sm font-semibold text-slate-700">
                       Start Date
                     </label>
                     <input
@@ -1804,17 +1826,17 @@ const Attendance = () => {
                       name="startDate"
                       value={formData.startDate}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium"
+                      className="w-full px-4 py-3 font-medium transition-all duration-200 bg-white border shadow-sm border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-700"
                     />
                     {errors.startDate && (
-                      <p className="text-red-500 text-sm mt-2 font-medium">
+                      <p className="mt-2 text-sm font-medium text-red-500">
                         {errors.startDate}
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-slate-700 mb-3">
+                    <label className="block mb-3 text-sm font-semibold text-slate-700">
                       End Date
                     </label>
                     <input
@@ -1823,10 +1845,10 @@ const Attendance = () => {
                       value={formData.endDate}
                       onChange={handleInputChange}
                       min={formData.startDate}
-                      className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium"
+                      className="w-full px-4 py-3 font-medium transition-all duration-200 bg-white border shadow-sm border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-700"
                     />
                     {errors.endDate && (
-                      <p className="text-red-500 text-sm mt-2 font-medium">
+                      <p className="mt-2 text-sm font-medium text-red-500">
                         {errors.endDate}
                       </p>
                     )}
@@ -1834,7 +1856,7 @@ const Attendance = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">
+                  <label className="block mb-3 text-sm font-semibold text-slate-700">
                     Reason
                   </label>
                   <textarea
@@ -1842,10 +1864,10 @@ const Attendance = () => {
                     value={formData.reason}
                     onChange={handleInputChange}
                     placeholder="Enter reason for leave"
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium min-h-32 resize-none"
+                    className="w-full px-4 py-3 font-medium transition-all duration-200 bg-white border shadow-sm resize-none border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-700 min-h-32"
                   />
                   {errors.reason && (
-                    <p className="text-red-500 text-sm mt-2 font-medium">
+                    <p className="mt-2 text-sm font-medium text-red-500">
                       {errors.reason}
                     </p>
                   )}
@@ -1864,7 +1886,7 @@ const Attendance = () => {
             >
               {isGettingLocation ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   Getting Location...
                 </span>
               ) : isSubmitting ? (
