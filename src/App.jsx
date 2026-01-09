@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, createContext } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
+import { AuthContext } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Attendance from "./pages/Attendents";
 import Sidebar from "./components/Sidebaar";
@@ -19,30 +20,76 @@ import LocalTravelHistory from "./pages/LocalTravelHistory";
 import AdvanceRequest from "./pages/Advance";
 import Approval from "./pages/Approval";
 
-export const AuthContext = createContext(null);
-
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // CRITICAL FIX: Initialize auth state from localStorage SYNCHRONOUSLY
+  // Using lazy initializer functions to read from localStorage on first render
+  // This prevents the flash of login page on page reload
+
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    // Synchronously check localStorage on initial render
+    const auth = localStorage.getItem("isAuthenticated");
+    return auth === "true";
+  });
+
   const [notification, setNotification] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [userType, setUserType] = useState(null);
-  const [tabs, setTabs] = useState([]);
+
+  const [currentUser, setCurrentUser] = useState(() => {
+    // Synchronously get user from localStorage on initial render
+    const storedUser = localStorage.getItem("currentUser");
+    if (storedUser) {
+      try {
+        return JSON.parse(storedUser);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const [userType, setUserType] = useState(() => {
+    return localStorage.getItem("userType") || null;
+  });
+
+  const [tabs, setTabs] = useState(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        return parsed.tabs || [];
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
 
   // Spreadsheet ID for Google Sheets data
   const SPREADSHEET_ID = "10coGuAVkdMNVUoX_L2HedehSb7d5lpgGQHTNjAZiGaQ";
 
+  // This useEffect is now only for listening to storage changes (e.g., from other tabs)
+  // The initial state is already set synchronously above
   useEffect(() => {
-    const auth = localStorage.getItem("isAuthenticated");
-    const storedUser = localStorage.getItem("currentUser");
-    const storedUserType = localStorage.getItem("userType");
+    // Listen for storage changes from other tabs
+    const handleStorageChange = (e) => {
+      if (e.key === "isAuthenticated") {
+        setIsAuthenticated(e.newValue === "true");
+      }
+      if (e.key === "currentUser" && e.newValue) {
+        try {
+          const parsedUser = JSON.parse(e.newValue);
+          setCurrentUser(parsedUser);
+          setTabs(parsedUser.tabs || []);
+        } catch (error) {
+          console.error("Error parsing stored user:", error);
+        }
+      }
+      if (e.key === "userType") {
+        setUserType(e.newValue);
+      }
+    };
 
-    if (auth === "true" && storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setIsAuthenticated(true);
-      setCurrentUser(parsedUser);
-      setUserType(storedUserType);
-      setTabs(parsedUser.tabs || []);
-    }
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const login = async (username, password) => {
@@ -72,18 +119,15 @@ const App = () => {
         const rowUsername = row.c?.[1]?.v;
         const rowPassword = row.c?.[2]?.v;
 
-        
-
         return (
           String(rowUsername) === String(username) &&
-          String(rowPassword) === String(password) 
+          String(rowPassword) === String(password)
         );
       });
 
       if (foundUserRow) {
         const accessValue = foundUserRow.c?.[4]?.v;
 
-        
         const InFiled = foundUserRow.c?.[5]?.v;
 
         let userTabs = [];

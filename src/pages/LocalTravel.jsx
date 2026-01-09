@@ -10,7 +10,7 @@ import {
   Trash2,
   ArrowLeft,
 } from "lucide-react";
-import { AuthContext } from "../App";
+import { AuthContext } from "../context/AuthContext";
 
 const Travel = () => {
   const [travels, setTravels] = useState([]);

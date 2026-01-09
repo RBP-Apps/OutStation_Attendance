@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useContext } from "react";
 import { MapPin, Loader2, ArrowLeft, Calendar, DollarSign, Building, FileText, History, CheckCircle } from "lucide-react";
-import { AuthContext } from "../App";
+import { AuthContext } from "../context/AuthContext";
 
 const Advance = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);

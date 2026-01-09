@@ -16,7 +16,7 @@ import {
   MoveRight,
 } from "lucide-react";
 
-import { AuthContext } from "../App";
+import { AuthContext } from "../context/AuthContext";
 
 function Sidebar({ userType, username, tabs = [] }) {
   const location = useLocation();

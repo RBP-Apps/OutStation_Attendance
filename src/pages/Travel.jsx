@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useContext } from "react";
 import { MapPin, Loader2, Upload, Eye, Plus, Trash2 } from "lucide-react";
-import { AuthContext } from "../App";
+import { AuthContext } from "../context/AuthContext";
 
 const Travel = () => {
   const [travels, setTravels] = useState([]);

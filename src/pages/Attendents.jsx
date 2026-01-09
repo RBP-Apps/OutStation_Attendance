@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef, useCallback } from "react";
+import ReactDOM from "react-dom";
 import {
   MapPin,
   Loader2,
@@ -12,7 +13,7 @@ import {
   Upload,
   Camera,
 } from "lucide-react";
-import { AuthContext } from "../App";
+import { AuthContext } from "../context/AuthContext";
 
 // Attendance Summary Card Component with Enhanced Mispunch Logic
 const AttendanceSummaryCard = ({
@@ -805,6 +806,10 @@ const AttendanceHistory = ({
     </div>
   );
 };
+
+// NOTE: File inputs are now rendered inline in the Attendance component,
+// outside the form element. The ImageCapturePortal approach was causing
+// memory issues on mobile. Simple inline inputs work better.
 
 // Main Attendance Component (rest of the code remains the same)
 const Attendance = () => {
@@ -1699,85 +1704,116 @@ const Attendance = () => {
     );
   }
 
-  // Refs for file inputs - using refs instead of getElementById for better React patterns
+  // Refs for file inputs - passed to ImageCapturePortal
   const uploadInputRef = useRef(null);
   const captureInputRef = useRef(null);
 
   /**
-   * FIX: Comprehensive mobile-safe image upload handler
+   * Callback for ImageCapturePortal - sets the image in state
+   * This is the ONLY handler needed now - the portal handles all file reading
+   */
+  const onImageCapture = useCallback((base64Image) => {
+    if (base64Image) {
+      setFormData((prev) => ({ ...prev, image: base64Image }));
+      setCameraPhoto(base64Image);
+    }
+  }, []);
+
+  /**
+   * BULLETPROOF Mobile Image Upload Handler
    *
-   * Why page refreshes happen on mobile:
-   * 1. Form submission triggered by focus/blur events on file inputs
-   * 2. FileReader async operations causing React re-renders mid-operation
-   * 3. iOS Safari auto-submits forms when file picker closes
-   * 4. Event bubbling to parent form element
+   * Key fixes for mobile page refresh:
+   * 1. Use onload instead of onloadend (more reliable on mobile)
+   * 2. Use requestAnimationFrame instead of setTimeout (better mobile compatibility)
+   * 3. Create new FileReader inside the async context
+   * 4. Clone the file blob to prevent reference loss
    */
   const handleImageUpload = (e) => {
-    // FIX 1: Prevent default immediately to stop any form-related behavior
-    e.preventDefault();
-    e.stopPropagation();
-
-    const file = e.target?.files?.[0];
-    if (!file) {
-      // Reset input even if no file selected (user cancelled)
-      if (e.target) e.target.value = "";
-      return;
+    // CRITICAL: Prevent ALL default behaviors immediately
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
+    if (e && e.nativeEvent && e.nativeEvent.stopImmediatePropagation) {
+      e.nativeEvent.stopImmediatePropagation();
     }
 
-    // FIX 2: Store file reference before resetting input
-    // Some mobile browsers lose the file reference if we reset synchronously
-    const fileToProcess = file;
+    // Get file safely
+    const files = e?.target?.files;
+    if (!files || files.length === 0) {
+      // Reset input on cancel
+      try {
+        if (e?.target) e.target.value = "";
+      } catch (err) {
+        // Ignore reset errors
+      }
+      return false;
+    }
 
-    // FIX 3: Reset input value in a microtask to ensure file is captured first
-    queueMicrotask(() => {
-      if (e.target) e.target.value = "";
-    });
+    // Clone the file to prevent reference loss on mobile
+    const file = files[0];
+    const fileBlob = new Blob([file], { type: file.type });
 
-    // FIX 4: Wrap FileReader in setTimeout to break out of the event loop
-    // This prevents mobile browsers from associating the read with form submission
-    setTimeout(() => {
+    // Reset input immediately to allow re-selection
+    try {
+      if (e?.target) e.target.value = "";
+    } catch (err) {
+      // Ignore reset errors
+    }
+
+    // Use requestAnimationFrame to completely decouple from the event
+    requestAnimationFrame(() => {
       const reader = new FileReader();
 
-      reader.onloadend = () => {
-        // FIX 5: Check if result exists before setting state
-        if (reader.result) {
-          // Use callback-based setState to avoid stale closure issues on mobile
-          setFormData((prev) => ({ ...prev, image: reader.result }));
-          // Also set camera photo as backup
-          setCameraPhoto(reader.result);
+      // Use onload (not onloadend) - more reliable on mobile
+      reader.onload = (event) => {
+        const result = event?.target?.result || reader.result;
+        if (result) {
+          // Update state with the base64 image
+          setFormData((prev) => ({ ...prev, image: result }));
+          setCameraPhoto(result);
         }
       };
 
       reader.onerror = () => {
-        console.error("Error reading file:", reader.error);
+        console.error("FileReader error:", reader.error);
         showToast("Failed to read image. Please try again.", "error");
       };
 
-      // FIX 6: Use try-catch for FileReader operations
       try {
-        reader.readAsDataURL(fileToProcess);
+        reader.readAsDataURL(fileBlob);
       } catch (error) {
-        console.error("FileReader error:", error);
+        console.error("FileReader exception:", error);
         showToast("Failed to process image. Please try again.", "error");
       }
-    }, 0);
+    });
+
+    return false;
   };
 
   /**
-   * FIX: Safe click handler for triggering file input
-   * Prevents any form submission behavior when opening file picker
+   * BULLETPROOF Click Handler for File Inputs
+   * Uses requestAnimationFrame for better mobile compatibility
    */
   const handleFileInputClick = (inputRef, e) => {
-    // Prevent ALL default behaviors and bubbling
-    e.preventDefault();
-    e.stopPropagation();
+    // Prevent ALL possible default behaviors
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.nativeEvent) {
+        e.nativeEvent.stopImmediatePropagation();
+      }
+    }
 
-    // FIX: Use setTimeout to decouple click from potential form events
-    setTimeout(() => {
-      inputRef.current?.click();
-    }, 0);
+    // Use requestAnimationFrame to completely decouple from form context
+    requestAnimationFrame(() => {
+      if (inputRef?.current) {
+        inputRef.current.click();
+      }
+    });
 
-    // Return false as additional prevention
     return false;
   };
 
@@ -1837,40 +1873,59 @@ const Attendance = () => {
           </div>
 
           {/* 
-            CRITICAL FIX: File inputs MUST be outside the form element!
-            On mobile browsers, file inputs inside forms can trigger form submission
-            when the file picker opens/closes, causing page refresh and auth loss.
+            SIMPLE APPROACH: Hidden file inputs OUTSIDE the form element.
+            This prevents form submission when file picker opens/closes.
+            Much simpler than portal approach and doesn't cause memory issues.
           */}
           <input
             ref={uploadInputRef}
             type="file"
             accept="image/*"
-            onChange={handleImageUpload}
-            style={{
-              display: "none",
-              visibility: "hidden",
-              position: "absolute",
-              left: "-9999px",
+            onChange={(e) => {
+              const file = e.target?.files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  if (event.target?.result) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      image: event.target.result,
+                    }));
+                    setCameraPhoto(event.target.result);
+                  }
+                };
+                reader.readAsDataURL(file);
+              }
+              e.target.value = "";
             }}
-            tabIndex={-1}
-            aria-hidden="true"
+            style={{ display: "none" }}
           />
           <input
             ref={captureInputRef}
             type="file"
             accept="image/*"
             capture="environment"
-            onChange={handleImageUpload}
-            style={{
-              display: "none",
-              visibility: "hidden",
-              position: "absolute",
-              left: "-9999px",
+            onChange={(e) => {
+              const file = e.target?.files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  if (event.target?.result) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      image: event.target.result,
+                    }));
+                    setCameraPhoto(event.target.result);
+                  }
+                };
+                reader.readAsDataURL(file);
+              }
+              e.target.value = "";
             }}
-            tabIndex={-1}
-            aria-hidden="true"
+            style={{ display: "none" }}
           />
 
+          {/* Form - file inputs are above, outside the form */}
           <form onSubmit={handleSubmit} className="p-8 space-y-8">
             <div className="grid gap-6 lg:grid-cols-1">
               <div className="space-y-2">
@@ -1901,50 +1956,47 @@ const Attendance = () => {
             {(formData.status === "IN" || formData.status === "OUT") && (
               <>
                 {/* 
-                  File inputs are now OUTSIDE the form (see above the form element).
-                  This completely prevents form submission triggers on mobile devices.
-                  The buttons below use refs to trigger those external inputs.
+                  SIMPLE MOBILE APPROACH: Visible file input with label styling.
+                  No hidden inputs, no refs, no complex click handlers.
+                  The label IS the button - much simpler and reliable on mobile.
                 */}
 
-                <div className="flex space-x-2">
-                  {/* Upload Button - Desktop only */}
-                  <button
-                    type="button"
-                    onClick={(e) => handleFileInputClick(uploadInputRef, e)}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    onTouchStart={(e) => {
-                      e.stopPropagation();
-                    }}
-                    className="items-center justify-center flex-1 hidden px-4 py-2 transition border-2 border-gray-300 border-dashed rounded-lg cursor-pointer sm:flex hover:border-blue-500"
-                  >
-                    <Upload className="w-5 h-5 mr-2 text-gray-600" />
-                    <span className="text-sm text-gray-600">Upload Image</span>
-                  </button>
-
-                  {/* Camera Button - Primary for mobile */}
-                  <button
-                    type="button"
-                    onClick={(e) => handleFileInputClick(captureInputRef, e)}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    onTouchStart={(e) => {
-                      e.stopPropagation();
-                    }}
-                    className="flex items-center justify-center flex-1 px-4 py-2 text-blue-600 transition border border-blue-200 rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100"
-                  >
+                <div className="space-y-3">
+                  {/* Camera/Photo Input - Direct visible input styled as button */}
+                  <label className="flex items-center justify-center w-full px-4 py-3 text-blue-600 transition border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 hover:border-blue-400">
                     <Camera className="w-5 h-5 mr-2" />
-                    Take Photo
-                  </button>
+                    <span className="font-medium">
+                      Take Photo or Select Image
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target?.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            if (event.target?.result) {
+                              setFormData((prev) => ({
+                                ...prev,
+                                image: event.target.result,
+                              }));
+                              setCameraPhoto(event.target.result);
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
                 </div>
 
                 {/* Image Preview */}
                 {formData.image && (
-                  <div className="relative">
+                  <div className="relative mt-4">
                     <img
                       src={formData.image}
                       alt="Preview"
@@ -1953,6 +2005,16 @@ const Attendance = () => {
                     <div className="absolute px-2 py-1 text-xs font-medium text-white bg-green-500 rounded-full top-2 right-2">
                       ✓ Photo Captured
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData((prev) => ({ ...prev, image: null }));
+                        setCameraPhoto(null);
+                      }}
+                      className="absolute px-2 py-1 text-xs font-medium text-white bg-red-500 rounded-full top-2 left-2 hover:bg-red-600"
+                    >
+                      ✕ Remove
+                    </button>
                   </div>
                 )}
               </>

@@ -2,7 +2,7 @@
 
 import React, { useContext } from "react";
 import { Play, Users, Settings, BarChart3, FileText, Wrench, Clock, MapPin, Receipt, CreditCard, History } from "lucide-react";
-import { AuthContext } from "../App";
+import { AuthContext } from "../context/AuthContext";
 
 const Video = () => {
   const { currentUser } = useContext(AuthContext);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useContext } from "react";
 import { MapPin, Eye, Loader2, ChevronDown, ChevronUp, Calendar, Search, X, Car } from "lucide-react";
-import { AuthContext } from "../App";
+import { AuthContext } from "../context/AuthContext";
 
 const LocalTravelHistory = () => {
   const [localTravels, setLocalTravels] = useState([]);

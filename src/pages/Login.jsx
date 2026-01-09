@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from '../App';
+import { AuthContext } from "../context/AuthContext";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -44,7 +43,6 @@ function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          
           <p className="text-slate-600">Sign in to access your dashboard</p>
         </div>
 
