@@ -20,6 +20,7 @@ const AttendanceSummaryCard = ({
   isLoading,
   userRole,
   salesPersonName,
+  selectedMonth,
 }) => {
   const [summaryData, setSummaryData] = useState({
     totalPresent: 0,
@@ -64,36 +65,43 @@ const AttendanceSummaryCard = ({
 
     const isDayOver = isDayComplete(dateStr);
 
-    // Perfect match - no mispunch
-    if (inCount === outCount) {
-      return { isMispunch: false, type: "complete" };
+    // Valid Attendance: At least one IN and one OUT
+    if (inCount >= 1 && outCount >= 1) {
+      // Perfect match
+      if (inCount === outCount) {
+        return { isMispunch: false, type: "complete" };
+      }
+      // Mismatched counts but has both In and Out (e.g. 2 IN, 1 OUT) - technically valid for "Present" status, just duplicate punches
+      return {
+        isMispunch: false, // Don't flag as mispunch to avoid confusing user
+        type: "complete_with_duplicates",
+        details: `${inCount} IN vs ${outCount} OUT - Valid attendance (duplicate punches detected)`,
+      };
     }
 
-    // More INs than OUTs
-    if (inCount > outCount) {
+    // Missing OUT: Has IN but no OUT
+    if (inCount > 0 && outCount === 0) {
       if (isDayOver) {
         return {
           isMispunch: true,
           type: "missing_out",
-          details: `${inCount} IN vs ${outCount} OUT - Missing ${
-            inCount - outCount
-          } OUT punch(es)`,
+          details: `${inCount} IN - Missing OUT punch`,
         };
       } else {
         return {
           isMispunch: false,
           type: "in_progress",
-          details: `${inCount} IN vs ${outCount} OUT - Day in progress`,
+          details: "Day in progress",
         };
       }
     }
 
-    // More OUTs than INs (invalid case)
-    if (outCount > inCount) {
+    // Invalid: Has OUT but no IN
+    if (outCount > 0 && inCount === 0) {
       return {
         isMispunch: true,
         type: "invalid",
-        details: `${inCount} IN vs ${outCount} OUT - Invalid: More OUT than IN punches`,
+        details: `${outCount} OUT - Missing IN punch`,
       };
     }
 
@@ -122,13 +130,46 @@ const AttendanceSummaryCard = ({
           );
 
     // Calculate statistics
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
+    let targetMonth, targetYear;
+
+    if (selectedMonth) {
+      const monthDate = new Date(selectedMonth); // "December 2025" -> Date obj
+      if (!isNaN(monthDate.getTime())) {
+        targetMonth = monthDate.getMonth();
+        targetYear = monthDate.getFullYear();
+      } else {
+        // Fallback or handle "Month Year" string manual parsing if simple Date(string) fails (browser dependent, but usually works for "Month Year")
+        // Robust manual parsing:
+        const [mName, yStr] = selectedMonth.split(" ");
+        const monthNames = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        targetMonth = monthNames.indexOf(mName);
+        targetYear = parseInt(yStr);
+      }
+    } else {
+      targetMonth = new Date().getMonth();
+      targetYear = new Date().getFullYear();
+    }
 
     // Group by employee and date to calculate daily statistics
     const employeeDailyRecords = {};
 
     userSpecificData.forEach((entry) => {
+      // Robust status matching
+      const statusNormalized = entry.status?.trim().toUpperCase();
+
       if (!entry.dateTime) return;
 
       const dateStr = entry.dateTime.split(" ")[0];
@@ -141,10 +182,10 @@ const AttendanceSummaryCard = ({
         parseInt(day)
       );
 
-      // Only count current month records
+      // Only count target month records
       if (
-        entryDate.getMonth() === currentMonth &&
-        entryDate.getFullYear() === currentYear
+        entryDate.getMonth() === targetMonth &&
+        entryDate.getFullYear() === targetYear
       ) {
         const employeeName = entry.salesPersonName || "Unknown";
         const dateKey = `${employeeName}_${dateStr}`;
@@ -161,21 +202,24 @@ const AttendanceSummaryCard = ({
           };
         }
 
-        if (entry.status === "IN") {
+        if (statusNormalized === "IN") {
           employeeDailyRecords[dateKey].inCount++;
           employeeDailyRecords[dateKey].punches.push({
             type: "IN",
             time: entry.dateTime,
             status: entry.status,
           });
-        } else if (entry.status === "OUT") {
+        } else if (statusNormalized === "OUT") {
           employeeDailyRecords[dateKey].outCount++;
           employeeDailyRecords[dateKey].punches.push({
             type: "OUT",
             time: entry.dateTime,
             status: entry.status,
           });
-        } else if (entry.status === "Leave") {
+        } else if (
+          statusNormalized === "LEAVE" ||
+          statusNormalized === "LEAVES"
+        ) {
           employeeDailyRecords[dateKey].leaveCount++;
           employeeDailyRecords[dateKey].hasLeave = true;
           employeeDailyRecords[dateKey].punches.push({
@@ -230,6 +274,7 @@ const AttendanceSummaryCard = ({
       }
     });
 
+    // console.log(totalPresent,"totalpresent")
     setSummaryData({
       totalPresent,
       totalLeave: Math.max(
@@ -241,7 +286,7 @@ const AttendanceSummaryCard = ({
       totalMispunch,
       mispunchDetails,
     });
-  }, [attendanceData, salesPersonName, userRole]);
+  }, [attendanceData, salesPersonName, userRole, selectedMonth]);
 
   if (isLoading) {
     return (
@@ -410,97 +455,20 @@ const AttendanceSummaryCard = ({
 };
 
 // AttendanceHistory Component with filters in header and Excel download functionality
-const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
-  const [filters, setFilters] = useState({
-    name: "",
-    status: "",
-    month: "",
-  });
-  const [filteredData, setFilteredData] = useState([]);
-
-  // Month names for dropdown
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const getUniqueNames = (data) => {
-    const names = data.map((entry) => entry.salesPersonName).filter(Boolean);
-    return [...new Set(names)].sort();
-  };
-
-  const getAvailableMonths = (data) => {
-    const months = new Set();
-    data.forEach((entry) => {
-      if (entry.dateTime) {
-        const dateStr = entry.dateTime.split(" ")[0];
-        if (dateStr) {
-          const [day, month, year] = dateStr.split("/");
-          const monthNum = parseInt(month, 10) - 1;
-          const monthName = monthNames[monthNum];
-          if (monthName) {
-            months.add(`${monthName} ${year}`);
-          }
-        }
-      }
-    });
-    return Array.from(months).sort((a, b) => {
-      const [aMonth, aYear] = a.split(" ");
-      const [bMonth, bYear] = b.split(" ");
-      const aDate = new Date(parseInt(aYear), monthNames.indexOf(aMonth));
-      const bDate = new Date(parseInt(bYear), monthNames.indexOf(bMonth));
-      return bDate - aDate;
-    });
-  };
-
-  const applyFilters = (data) => {
-    if (!filters.name && !filters.status && !filters.month) {
-      return data;
-    }
-
-    return data.filter((entry) => {
-      if (
-        filters.name &&
-        !entry.salesPersonName
-          ?.toLowerCase()
-          .includes(filters.name.toLowerCase())
-      ) {
-        return false;
-      }
-
-      if (filters.status && entry.status !== filters.status) {
-        return false;
-      }
-
-      if (filters.month) {
-        const entryDate = entry.dateTime?.split(" ")[0];
-        if (entryDate) {
-          const [day, month, year] = entryDate.split("/");
-          const monthNum = parseInt(month, 10) - 1;
-          const monthName = monthNames[monthNum];
-          const entryMonthYear = `${monthName} ${year}`;
-          if (entryMonthYear !== filters.month) {
-            return false;
-          }
-        }
-      }
-
-      return true;
-    });
-  };
-
+const AttendanceHistory = ({
+  attendanceData,
+  isLoading,
+  userRole,
+  filters,
+  setFilters,
+  filteredData,
+  getUniqueNames,
+  getAvailableMonths,
+  monthNames, // Passed down if needed for other things, though we use getAvailableMonths mostly
+}) => {
   // Enhanced Excel download function
   const downloadExcel = () => {
+    // Use filteredData passed from parent
     if (!filteredData || filteredData.length === 0) {
       alert("No data available to download");
       return;
@@ -581,11 +549,6 @@ const AttendanceHistory = ({ attendanceData, isLoading, userRole }) => {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
-
-  useEffect(() => {
-    const filtered = applyFilters(attendanceData || []);
-    setFilteredData(filtered);
-  }, [filters, attendanceData]);
 
   const handleFilterChange = (filterType, value) => {
     setFilters((prev) => ({
@@ -903,12 +866,12 @@ const Attendance = () => {
     return date.toISOString().split("T")[0];
   };
 
-  const formatDateMMDDYYYY = (date) => {
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
-  };
+  // const formatDateMMDDYYYY = (date) => {
+  //   const day = String(date.getDate()).padStart(2, "0");
+  //   const month = String(date.getMonth() + 1).padStart(2, "0");
+  //   const year = date.getFullYear();
+  //   return `${month}/${day}/${year}`;
+  // };
 
   const formatDateDDMMYYYY = (date) => {
     const day = String(date.getDate()).padStart(2, "0");
@@ -946,6 +909,102 @@ const Attendance = () => {
     reason: "",
     image: "",
   });
+
+  // Lifted Filter State
+  const [filters, setFilters] = useState({
+    name: "",
+    status: "",
+    month: "",
+  });
+  const [filteredHistoryCallbackData, setFilteredHistoryCallbackData] =
+    useState([]);
+
+  // Month names for dropdown
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const getUniqueNames = (data) => {
+    const names = data.map((entry) => entry.salesPersonName).filter(Boolean);
+    return [...new Set(names)].sort();
+  };
+
+  const getAvailableMonths = (data) => {
+    const months = new Set();
+    data.forEach((entry) => {
+      if (entry.dateTime) {
+        const dateStr = entry.dateTime.split(" ")[0];
+        if (dateStr) {
+          const [day, month, year] = dateStr.split("/");
+          const monthNum = parseInt(month, 10) - 1;
+          const monthName = monthNames[monthNum];
+          if (monthName) {
+            months.add(`${monthName} ${year}`);
+          }
+        }
+      }
+    });
+    return Array.from(months).sort((a, b) => {
+      const [aMonth, aYear] = a.split(" ");
+      const [bMonth, bYear] = b.split(" ");
+      const aDate = new Date(parseInt(aYear), monthNames.indexOf(aMonth));
+      const bDate = new Date(parseInt(bYear), monthNames.indexOf(bMonth));
+      return bDate - aDate;
+    });
+  };
+
+  const applyFilters = (data) => {
+    if (!filters.name && !filters.status && !filters.month) {
+      return data;
+    }
+
+    return data.filter((entry) => {
+      if (
+        filters.name &&
+        !entry.salesPersonName
+          ?.toLowerCase()
+          .includes(filters.name.toLowerCase())
+      ) {
+        return false;
+      }
+
+      if (filters.status && entry.status !== filters.status) {
+        return false;
+      }
+
+      if (filters.month) {
+        const entryDate = entry.dateTime?.split(" ")[0];
+        if (entryDate) {
+          const [day, month, year] = entryDate.split("/");
+          const monthNum = parseInt(month, 10) - 1;
+          const monthName = monthNames[monthNum];
+          const entryMonthYear = `${monthName} ${year}`;
+          if (entryMonthYear !== filters.month) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    });
+  };
+
+  // Effect to update filtered data when filters or attendance change
+  useEffect(() => {
+    const filtered = applyFilters(historyAttendance || []);
+    setFilteredHistoryCallbackData(filtered);
+  }, [filters, historyAttendance]);
 
   const showToast = (message, type = "success") => {
     const toast = document.createElement("div");
@@ -1107,6 +1166,15 @@ const Attendance = () => {
       const jsonEnd = text.lastIndexOf("}") + 1;
       const jsonData = text.substring(jsonStart, jsonEnd);
       const data = JSON.parse(jsonData);
+
+      // console.log(data,"attendance sheet data")
+
+      // const   persondata = data.table.rows.filter((row) => {
+      //     const salesPerson = row.c?.[9]?.v;
+      //     return salesPerson === currentUser?.salesPersonName;
+      //   });
+
+      //   console.log(persondata,"persondata")
 
       if (!data?.table?.rows) {
         console.warn("No rows found in Attendance sheet.");
@@ -1455,13 +1523,6 @@ const Attendance = () => {
         rowData: JSON.stringify(rowData),
       };
 
-      // In your frontend handleSubmit function, before sending data:
-      console.log("🔄 Sending attendance data:");
-      console.log("Photo URL:", imageUrl);
-      console.log("Row data array:", rowData);
-      console.log("Row data length:", rowData.length);
-      console.log("Column P (index 15) value:", rowData[15]);
-
       const urlEncodedData = new URLSearchParams(payload);
 
       // ========== OPTIMISTIC UI UPDATE (10x FASTER) ==========
@@ -1638,28 +1699,86 @@ const Attendance = () => {
     );
   }
 
+  // Refs for file inputs - using refs instead of getElementById for better React patterns
+  const uploadInputRef = useRef(null);
+  const captureInputRef = useRef(null);
+
+  /**
+   * FIX: Comprehensive mobile-safe image upload handler
+   *
+   * Why page refreshes happen on mobile:
+   * 1. Form submission triggered by focus/blur events on file inputs
+   * 2. FileReader async operations causing React re-renders mid-operation
+   * 3. iOS Safari auto-submits forms when file picker closes
+   * 4. Event bubbling to parent form element
+   */
   const handleImageUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    // FIX 1: Prevent default immediately to stop any form-related behavior
+    e.preventDefault();
+    e.stopPropagation();
 
-    // Reset the input value to allow re-selecting the same file
-    e.target.value = "";
+    const file = e.target?.files?.[0];
+    if (!file) {
+      // Reset input even if no file selected (user cancelled)
+      if (e.target) e.target.value = "";
+      return;
+    }
 
-    const reader = new FileReader();
+    // FIX 2: Store file reference before resetting input
+    // Some mobile browsers lose the file reference if we reset synchronously
+    const fileToProcess = file;
 
-    reader.onloadend = () => {
-      // Use callback-based setState to avoid stale closure issues on mobile
-      setFormData((prev) => ({ ...prev, image: reader.result }));
-      // Also set camera photo as backup
-      setCameraPhoto(reader.result);
-    };
+    // FIX 3: Reset input value in a microtask to ensure file is captured first
+    queueMicrotask(() => {
+      if (e.target) e.target.value = "";
+    });
 
-    reader.onerror = () => {
-      console.error("Error reading file:", reader.error);
-      showToast("Failed to read image. Please try again.", "error");
-    };
+    // FIX 4: Wrap FileReader in setTimeout to break out of the event loop
+    // This prevents mobile browsers from associating the read with form submission
+    setTimeout(() => {
+      const reader = new FileReader();
 
-    reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        // FIX 5: Check if result exists before setting state
+        if (reader.result) {
+          // Use callback-based setState to avoid stale closure issues on mobile
+          setFormData((prev) => ({ ...prev, image: reader.result }));
+          // Also set camera photo as backup
+          setCameraPhoto(reader.result);
+        }
+      };
+
+      reader.onerror = () => {
+        console.error("Error reading file:", reader.error);
+        showToast("Failed to read image. Please try again.", "error");
+      };
+
+      // FIX 6: Use try-catch for FileReader operations
+      try {
+        reader.readAsDataURL(fileToProcess);
+      } catch (error) {
+        console.error("FileReader error:", error);
+        showToast("Failed to process image. Please try again.", "error");
+      }
+    }, 0);
+  };
+
+  /**
+   * FIX: Safe click handler for triggering file input
+   * Prevents any form submission behavior when opening file picker
+   */
+  const handleFileInputClick = (inputRef, e) => {
+    // Prevent ALL default behaviors and bubbling
+    e.preventDefault();
+    e.stopPropagation();
+
+    // FIX: Use setTimeout to decouple click from potential form events
+    setTimeout(() => {
+      inputRef.current?.click();
+    }, 0);
+
+    // Return false as additional prevention
+    return false;
   };
 
   return (
@@ -1704,6 +1823,7 @@ const Attendance = () => {
           isLoading={isLoadingHistory}
           userRole={userRole}
           salesPersonName={salesPersonName}
+          selectedMonth={filters.month}
         />
 
         <div className="overflow-hidden border shadow-xl bg-white/80 backdrop-blur-sm rounded-2xl border-white/20">
@@ -1715,6 +1835,41 @@ const Attendance = () => {
               Record your daily attendance or apply for leave
             </p>
           </div>
+
+          {/* 
+            CRITICAL FIX: File inputs MUST be outside the form element!
+            On mobile browsers, file inputs inside forms can trigger form submission
+            when the file picker opens/closes, causing page refresh and auth loss.
+          */}
+          <input
+            ref={uploadInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            style={{
+              display: "none",
+              visibility: "hidden",
+              position: "absolute",
+              left: "-9999px",
+            }}
+            tabIndex={-1}
+            aria-hidden="true"
+          />
+          <input
+            ref={captureInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleImageUpload}
+            style={{
+              display: "none",
+              visibility: "hidden",
+              position: "absolute",
+              left: "-9999px",
+            }}
+            tabIndex={-1}
+            aria-hidden="true"
+          />
 
           <form onSubmit={handleSubmit} className="p-8 space-y-8">
             <div className="grid gap-6 lg:grid-cols-1">
@@ -1745,30 +1900,49 @@ const Attendance = () => {
 
             {(formData.status === "IN" || formData.status === "OUT") && (
               <>
+                {/* 
+                  File inputs are now OUTSIDE the form (see above the form element).
+                  This completely prevents form submission triggers on mobile devices.
+                  The buttons below use refs to trigger those external inputs.
+                */}
+
                 <div className="flex space-x-2">
-                  <label className="items-center justify-center flex-1 hidden px-4 py-2 transition border-2 border-gray-300 border-dashed rounded-lg cursor-pointer sm:flex hover:border-blue-500">
+                  {/* Upload Button - Desktop only */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleFileInputClick(uploadInputRef, e)}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onTouchStart={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="items-center justify-center flex-1 hidden px-4 py-2 transition border-2 border-gray-300 border-dashed rounded-lg cursor-pointer sm:flex hover:border-blue-500"
+                  >
                     <Upload className="w-5 h-5 mr-2 text-gray-600" />
                     <span className="text-sm text-gray-600">Upload Image</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e)}
-                      className="hidden"
-                    />
-                  </label>
-                  <label className="flex items-center justify-center px-4 py-2 text-blue-600 transition border border-blue-200 rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100">
+                  </button>
+
+                  {/* Camera Button - Primary for mobile */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleFileInputClick(captureInputRef, e)}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onTouchStart={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="flex items-center justify-center flex-1 px-4 py-2 text-blue-600 transition border border-blue-200 rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100"
+                  >
                     <Camera className="w-5 h-5 mr-2" />
                     Take Photo
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={(e) => handleImageUpload(e)}
-                      className="hidden"
-                    />
-                  </label>
+                  </button>
                 </div>
 
+                {/* Image Preview */}
                 {formData.image && (
                   <div className="relative">
                     <img
@@ -1909,6 +2083,12 @@ const Attendance = () => {
         attendanceData={historyAttendance}
         isLoading={isLoadingHistory}
         userRole={userRole}
+        filters={filters}
+        setFilters={setFilters}
+        filteredData={filteredHistoryCallbackData}
+        getUniqueNames={getUniqueNames}
+        getAvailableMonths={getAvailableMonths}
+        monthNames={monthNames}
       />
     </div>
   );
