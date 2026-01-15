@@ -16,65 +16,65 @@ const Approval = () => {
     fetchLeaveRequests();
   }, []);
 
-//   const fetchLeaveRequests = async () => {
-//     try {
-//       setLoading(true);
-//       setError(null);
+  //   const fetchLeaveRequests = async () => {
+  //     try {
+  //       setLoading(true);
+  //       setError(null);
 
-//       // ✅ Use Google Sheets gviz API instead of Apps Script endpoint
-//       const attendanceSheetUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=Attendance`;
+  //       // ✅ Use Google Sheets gviz API instead of Apps Script endpoint
+  //       const attendanceSheetUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=Attendance`;
 
-//       const response = await fetch(attendanceSheetUrl);
+  //       const response = await fetch(attendanceSheetUrl);
 
-//       if (!response.ok) {
-//         throw new Error(`HTTP error! status: ${response.status}`);
-//       }
+  //       if (!response.ok) {
+  //         throw new Error(`HTTP error! status: ${response.status}`);
+  //       }
 
-//       const text = await response.text();
+  //       const text = await response.text();
 
-//       // Parse the Google Visualization API response
-//       const jsonStart = text.indexOf("{");
-//       const jsonEnd = text.lastIndexOf("}") + 1;
-//       const jsonData = text.substring(jsonStart, jsonEnd);
-//       const data = JSON.parse(jsonData);
+  //       // Parse the Google Visualization API response
+  //       const jsonStart = text.indexOf("{");
+  //       const jsonEnd = text.lastIndexOf("}") + 1;
+  //       const jsonData = text.substring(jsonStart, jsonEnd);
+  //       const data = JSON.parse(jsonData);
 
-//       if (!data?.table?.rows) {
-//         setLeaveRequests([]);
-//         return;
-//       }
+  //       if (!data?.table?.rows) {
+  //         setLeaveRequests([]);
+  //         return;
+  //       }
 
-//       const rows = data.table.rows;
-//       const dataRows = rows.slice(1); // Skip header row
+  //       const rows = data.table.rows;
+  //       const dataRows = rows.slice(1); // Skip header row
 
-//       const formattedRequests = dataRows
-//         .map((row, index) => ({
-//           rowNumber: index + 2, // Actual sheet row (skip header)
-//           dateTime: row.c?.[1]?.v || "", // Column B
-//           endDate: row.c?.[4]?.v || "", // Column E
-//           status: row.c?.[3]?.v || "", // Column D
-//           reason: row.c?.[4]?.v || "", // Column E
-//           address: row.c?.[8]?.v || "", // Column I
-//           personName: row.c?.[9]?.v || "", // Column J
-//           date: row.c?.[10]?.v || "", // Column K
-//           approvedStatus: row.c?.[14]?.v || "", // Column O
-//         }))
-//         .filter((item) => {
-//           const status = item.status?.toString().toLowerCase() || "";
-//           // Show all rows where Status contains "leave" (both pending and approved)
-//           return status.includes("leave");
-//         });
+  //       const formattedRequests = dataRows
+  //         .map((row, index) => ({
+  //           rowNumber: index + 2, // Actual sheet row (skip header)
+  //           dateTime: row.c?.[1]?.v || "", // Column B
+  //           endDate: row.c?.[4]?.v || "", // Column E
+  //           status: row.c?.[3]?.v || "", // Column D
+  //           reason: row.c?.[4]?.v || "", // Column E
+  //           address: row.c?.[8]?.v || "", // Column I
+  //           personName: row.c?.[9]?.v || "", // Column J
+  //           date: row.c?.[10]?.v || "", // Column K
+  //           approvedStatus: row.c?.[14]?.v || "", // Column O
+  //         }))
+  //         .filter((item) => {
+  //           const status = item.status?.toString().toLowerCase() || "";
+  //           // Show all rows where Status contains "leave" (both pending and approved)
+  //           return status.includes("leave");
+  //         });
 
-//       setLeaveRequests(formattedRequests);
-//     } catch (err) {
-//       setError("Error loading data: " + err.message);
-//       console.error("Fetch error:", err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+  //       setLeaveRequests(formattedRequests);
+  //     } catch (err) {
+  //       setError("Error loading data: " + err.message);
+  //       console.error("Fetch error:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
 
-const fetchLeaveRequests = async () => {
+  const fetchLeaveRequests = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -137,7 +137,7 @@ const fetchLeaveRequests = async () => {
     }
   };
 
-  
+
   const handleApprove = async (request) => {
     if (!window.confirm(`Approve leave request for ${request.personName}?`)) {
       return;
@@ -148,7 +148,7 @@ const fetchLeaveRequests = async () => {
 
       const formData = new URLSearchParams();
       formData.append("action", "updateLeaveStatus");
-      formData.append("rowNumber", request.rowNumber+1);
+      formData.append("rowNumber", request.rowNumber + 1);
       formData.append("status", "Approved");
 
       const response = await fetch(SCRIPT_URL, {
@@ -389,11 +389,10 @@ const fetchLeaveRequests = async () => {
                             request.approvedStatus === "Approved" ||
                             processingId === request.rowNumber
                           } // ✅ Add the second condition
-                          className={` ${
-                            request.approvedStatus === "Approved"
-                              ? "bg-green-600 hover:bg-green-700 focus:ring-green-500"
-                              : "bg-red-600 hover:bg-red-700 focus:ring-red-500"
-                          } inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white  focus:outline-none focus:ring-2 focus:ring-offset-2  disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors`}
+                          className={` ${request.approvedStatus === "Approved"
+                            ? "bg-green-600 hover:bg-green-700 focus:ring-green-500"
+                            : "bg-red-600 hover:bg-red-700 focus:ring-red-500"
+                            } inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white  focus:outline-none focus:ring-2 focus:ring-offset-2  disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors`}
                         >
                           {processingId === request.rowNumber ? (
                             <>

@@ -313,13 +313,12 @@ const Travel = () => {
 
   const showToast = (message, type = "success") => {
     const toast = document.createElement("div");
-    toast.className = `fixed top-4 right-4 p-4 rounded-md text-white z-50 ${
-      type === "success"
-        ? "bg-green-500"
-        : type === "info"
+    toast.className = `fixed top-4 right-4 p-4 rounded-md text-white z-50 ${type === "success"
+      ? "bg-green-500"
+      : type === "info"
         ? "bg-blue-500"
         : "bg-red-500"
-    }`;
+      }`;
     toast.textContent = message;
     document.body.appendChild(toast);
 
@@ -556,9 +555,8 @@ const Travel = () => {
       // Upload images
       if (formData.inVehicleMeterImage) {
         try {
-          const fileName = `in_vehicle_meter_${salesPersonName}_${
-            formData.travelDate
-          }.${formData.inVehicleMeterImage.name.split(".").pop()}`;
+          const fileName = `in_vehicle_meter_${salesPersonName}_${formData.travelDate
+            }.${formData.inVehicleMeterImage.name.split(".").pop()}`;
           await uploadFileToGoogleDrive(formData.inVehicleMeterImage, fileName);
           vehicleImageLinks.push(fileName);
         } catch (uploadError) {
@@ -570,9 +568,8 @@ const Travel = () => {
 
       if (formData.inBusTicketImage) {
         try {
-          const fileName = `in_bus_ticket_${salesPersonName}_${
-            formData.travelDate
-          }.${formData.inBusTicketImage.name.split(".").pop()}`;
+          const fileName = `in_bus_ticket_${salesPersonName}_${formData.travelDate
+            }.${formData.inBusTicketImage.name.split(".").pop()}`;
           await uploadFileToGoogleDrive(formData.inBusTicketImage, fileName);
           vehicleImageLinks.push(fileName);
         } catch (uploadError) {
@@ -584,9 +581,8 @@ const Travel = () => {
 
       if (formData.inBillReceipt) {
         try {
-          const fileName = `in_bill_receipt_${salesPersonName}_${
-            formData.travelDate
-          }.${formData.inBillReceipt.name.split(".").pop()}`;
+          const fileName = `in_bill_receipt_${salesPersonName}_${formData.travelDate
+            }.${formData.inBillReceipt.name.split(".").pop()}`;
           await uploadFileToGoogleDrive(formData.inBillReceipt, fileName);
           vehicleImageLinks.push(fileName);
         } catch (uploadError) {
@@ -668,7 +664,7 @@ const Travel = () => {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams(payload),
-          mode: "no-cors",
+        mode: "no-cors",
       });
 
       await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -755,9 +751,8 @@ const Travel = () => {
       // Upload OUT images
       if (formData.outVehicleMeterImage) {
         try {
-          const fileName = `out_vehicle_meter_${salesPersonName}_${
-            formData.returnDate
-          }.${formData.outVehicleMeterImage.name.split(".").pop()}`;
+          const fileName = `out_vehicle_meter_${salesPersonName}_${formData.returnDate
+            }.${formData.outVehicleMeterImage.name.split(".").pop()}`;
           await uploadFileToGoogleDrive(
             formData.outVehicleMeterImage,
             fileName
@@ -772,9 +767,8 @@ const Travel = () => {
 
       if (formData.outBusTicketImage) {
         try {
-          const fileName = `out_bus_ticket_${salesPersonName}_${
-            formData.returnDate
-          }.${formData.outBusTicketImage.name.split(".").pop()}`;
+          const fileName = `out_bus_ticket_${salesPersonName}_${formData.returnDate
+            }.${formData.outBusTicketImage.name.split(".").pop()}`;
           await uploadFileToGoogleDrive(formData.outBusTicketImage, fileName);
           outVehicleImageLinks.push(fileName);
         } catch (uploadError) {
@@ -786,9 +780,8 @@ const Travel = () => {
 
       if (formData.outBillReceipt) {
         try {
-          const fileName = `out_bill_receipt_${salesPersonName}_${
-            formData.returnDate
-          }.${formData.outBillReceipt.name.split(".").pop()}`;
+          const fileName = `out_bill_receipt_${salesPersonName}_${formData.returnDate
+            }.${formData.outBillReceipt.name.split(".").pop()}`;
           await uploadFileToGoogleDrive(formData.outBillReceipt, fileName);
           outVehicleImageLinks.push(fileName);
         } catch (uploadError) {
@@ -1129,61 +1122,61 @@ const Travel = () => {
                 {/* Car/Bike Fields */}
                 {(formData.inVehicleType === "Car" ||
                   formData.inVehicleType === "Bike") && (
-                  <div className="grid gap-4 lg:grid-cols-2 mb-4">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-slate-700 mb-3">
-                        Vehicle Meter Number (IN)
-                      </label>
-                      <input
-                        type="text"
-                        name="inVehicleMeterNumber"
-                        value={formData.inVehicleMeterNumber}
-                        onChange={handleInputChange}
-                        placeholder="Enter meter reading"
-                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium"
-                      />
-                      {errors.inVehicleMeterNumber && (
-                        <p className="text-red-500 text-sm mt-2 font-medium">
-                          {errors.inVehicleMeterNumber}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-slate-700 mb-3">
-                        Vehicle Meter Image
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) =>
-                            handleFileChange(e, "inVehicleMeter")
-                          }
-                          className="hidden"
-                          id="inVehicleMeterUpload"
-                        />
-                        <label
-                          htmlFor="inVehicleMeterUpload"
-                          className="flex items-center justify-center w-full px-4 py-4 bg-white border-2 border-dashed border-slate-300 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
-                        >
-                          <div className="text-center">
-                            <Upload className="h-6 w-6 text-slate-400 mx-auto mb-1" />
-                            <p className="text-slate-600 text-sm">
-                              {formData.inVehicleMeterImageName ||
-                                "Upload meter image"}
-                            </p>
-                          </div>
+                    <div className="grid gap-4 lg:grid-cols-2 mb-4">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-700 mb-3">
+                          Vehicle Meter Number (IN)
                         </label>
+                        <input
+                          type="text"
+                          name="inVehicleMeterNumber"
+                          value={formData.inVehicleMeterNumber}
+                          onChange={handleInputChange}
+                          placeholder="Enter meter reading"
+                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium"
+                        />
+                        {errors.inVehicleMeterNumber && (
+                          <p className="text-red-500 text-sm mt-2 font-medium">
+                            {errors.inVehicleMeterNumber}
+                          </p>
+                        )}
                       </div>
-                      {errors.inVehicleMeterImage && (
-                        <p className="text-red-500 text-sm mt-2 font-medium">
-                          {errors.inVehicleMeterImage}
-                        </p>
-                      )}
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-700 mb-3">
+                          Vehicle Meter Image
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              handleFileChange(e, "inVehicleMeter")
+                            }
+                            className="hidden"
+                            id="inVehicleMeterUpload"
+                          />
+                          <label
+                            htmlFor="inVehicleMeterUpload"
+                            className="flex items-center justify-center w-full px-4 py-4 bg-white border-2 border-dashed border-slate-300 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
+                          >
+                            <div className="text-center">
+                              <Upload className="h-6 w-6 text-slate-400 mx-auto mb-1" />
+                              <p className="text-slate-600 text-sm">
+                                {formData.inVehicleMeterImageName ||
+                                  "Upload meter image"}
+                              </p>
+                            </div>
+                          </label>
+                        </div>
+                        {errors.inVehicleMeterImage && (
+                          <p className="text-red-500 text-sm mt-2 font-medium">
+                            {errors.inVehicleMeterImage}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Bus Fields */}
                 {formData.inVehicleType === "Bus" && (
@@ -1244,59 +1237,59 @@ const Travel = () => {
                 {/* Rent Car/Bike Fields */}
                 {(formData.inVehicleType === "Rent Car" ||
                   formData.inVehicleType === "Rent Bike") && (
-                  <div className="grid gap-4 lg:grid-cols-2 mb-4">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-slate-700 mb-3">
-                        Bill Receipt
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileChange(e, "inBillReceipt")}
-                          className="hidden"
-                          id="inBillReceiptUpload"
-                        />
-                        <label
-                          htmlFor="inBillReceiptUpload"
-                          className="flex items-center justify-center w-full px-4 py-4 bg-white border-2 border-dashed border-slate-300 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
-                        >
-                          <div className="text-center">
-                            <Upload className="h-6 w-6 text-slate-400 mx-auto mb-1" />
-                            <p className="text-slate-600 text-sm">
-                              {formData.inBillReceiptName ||
-                                "Upload bill receipt"}
-                            </p>
-                          </div>
+                    <div className="grid gap-4 lg:grid-cols-2 mb-4">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-700 mb-3">
+                          Bill Receipt
                         </label>
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileChange(e, "inBillReceipt")}
+                            className="hidden"
+                            id="inBillReceiptUpload"
+                          />
+                          <label
+                            htmlFor="inBillReceiptUpload"
+                            className="flex items-center justify-center w-full px-4 py-4 bg-white border-2 border-dashed border-slate-300 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
+                          >
+                            <div className="text-center">
+                              <Upload className="h-6 w-6 text-slate-400 mx-auto mb-1" />
+                              <p className="text-slate-600 text-sm">
+                                {formData.inBillReceiptName ||
+                                  "Upload bill receipt"}
+                              </p>
+                            </div>
+                          </label>
+                        </div>
+                        {errors.inBillReceipt && (
+                          <p className="text-red-500 text-sm mt-2 font-medium">
+                            {errors.inBillReceipt}
+                          </p>
+                        )}
                       </div>
-                      {errors.inBillReceipt && (
-                        <p className="text-red-500 text-sm mt-2 font-medium">
-                          {errors.inBillReceipt}
-                        </p>
-                      )}
-                    </div>
 
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-slate-700 mb-3">
-                        Amount
-                      </label>
-                      <input
-                        type="number"
-                        name="inRentAmount"
-                        value={formData.inRentAmount}
-                        onChange={handleInputChange}
-                        placeholder="Enter rent amount"
-                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium"
-                      />
-                      {errors.inRentAmount && (
-                        <p className="text-red-500 text-sm mt-2 font-medium">
-                          {errors.inRentAmount}
-                        </p>
-                      )}
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-700 mb-3">
+                          Amount
+                        </label>
+                        <input
+                          type="number"
+                          name="inRentAmount"
+                          value={formData.inRentAmount}
+                          onChange={handleInputChange}
+                          placeholder="Enter rent amount"
+                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium"
+                        />
+                        {errors.inRentAmount && (
+                          <p className="text-red-500 text-sm mt-2 font-medium">
+                            {errors.inRentAmount}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Remarks Field */}
                 <div className="space-y-2 mb-4">
@@ -1445,93 +1438,93 @@ const Travel = () => {
                 {/* Car/Bike Fields with IN meter display and OUT meter input */}
                 {(formData.outVehicleType === "Car" ||
                   formData.outVehicleType === "Bike") && (
-                  <div className="space-y-4 mb-4">
-                    {/* Display IN meter number (read-only) */}
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-slate-700 mb-3">
-                        Vehicle Meter Number (IN) - Reference
-                      </label>
-                      <input
-                        type="text"
-                        value={submittedInData?.inVehicleMeterNumber || ""}
-                        readOnly
-                        className="w-full px-4 py-3 bg-gray-100 border border-slate-200 rounded-xl shadow-sm text-slate-700 font-medium cursor-not-allowed"
-                        placeholder="IN meter number will appear here"
-                      />
-                    </div>
-
-                    {/* OUT meter number input */}
-                    <div className="grid gap-4 lg:grid-cols-2">
+                    <div className="space-y-4 mb-4">
+                      {/* Display IN meter number (read-only) */}
                       <div className="space-y-2">
                         <label className="block text-sm font-semibold text-slate-700 mb-3">
-                          Vehicle Meter Number (OUT){" "}
-                          <span className="text-red-500">*</span>
+                          Vehicle Meter Number (IN) - Reference
                         </label>
                         <input
                           type="text"
-                          name="outVehicleMeterNumber"
-                          value={formData.outVehicleMeterNumber}
-                          onChange={handleInputChange}
-                          placeholder="Enter OUT meter reading"
-                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium"
+                          value={submittedInData?.inVehicleMeterNumber || ""}
+                          readOnly
+                          className="w-full px-4 py-3 bg-gray-100 border border-slate-200 rounded-xl shadow-sm text-slate-700 font-medium cursor-not-allowed"
+                          placeholder="IN meter number will appear here"
                         />
-                        {errors.outVehicleMeterNumber && (
-                          <p className="text-red-500 text-sm mt-2 font-medium">
-                            {errors.outVehicleMeterNumber}
-                          </p>
-                        )}
-                        {/* Show calculated distance */}
-                        {formData.outVehicleMeterNumber &&
-                          submittedInData?.inVehicleMeterNumber && (
-                            <div className="bg-blue-100 p-3 rounded-lg">
-                              <p className="text-sm text-blue-800 font-medium">
-                                Total Running KM:{" "}
-                                {calculateTotalRunningKm(
-                                  submittedInData.inVehicleMeterNumber,
-                                  formData.outVehicleMeterNumber
-                                )}{" "}
-                                km
-                              </p>
-                            </div>
-                          )}
                       </div>
 
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-slate-700 mb-3">
-                          Vehicle Meter Image (OUT)
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                              handleFileChange(e, "outVehicleMeter")
-                            }
-                            className="hidden"
-                            id="outVehicleMeterUpload"
-                          />
-                          <label
-                            htmlFor="outVehicleMeterUpload"
-                            className="flex items-center justify-center w-full px-4 py-4 bg-white border-2 border-dashed border-slate-300 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
-                          >
-                            <div className="text-center">
-                              <Upload className="h-6 w-6 text-slate-400 mx-auto mb-1" />
-                              <p className="text-slate-600 text-sm">
-                                {formData.outVehicleMeterImageName ||
-                                  "Upload OUT meter image"}
-                              </p>
-                            </div>
+                      {/* OUT meter number input */}
+                      <div className="grid gap-4 lg:grid-cols-2">
+                        <div className="space-y-2">
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">
+                            Vehicle Meter Number (OUT){" "}
+                            <span className="text-red-500">*</span>
                           </label>
+                          <input
+                            type="text"
+                            name="outVehicleMeterNumber"
+                            value={formData.outVehicleMeterNumber}
+                            onChange={handleInputChange}
+                            placeholder="Enter OUT meter reading"
+                            className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium"
+                          />
+                          {errors.outVehicleMeterNumber && (
+                            <p className="text-red-500 text-sm mt-2 font-medium">
+                              {errors.outVehicleMeterNumber}
+                            </p>
+                          )}
+                          {/* Show calculated distance */}
+                          {formData.outVehicleMeterNumber &&
+                            submittedInData?.inVehicleMeterNumber && (
+                              <div className="bg-blue-100 p-3 rounded-lg">
+                                <p className="text-sm text-blue-800 font-medium">
+                                  Total Running KM:{" "}
+                                  {calculateTotalRunningKm(
+                                    submittedInData.inVehicleMeterNumber,
+                                    formData.outVehicleMeterNumber
+                                  )}{" "}
+                                  km
+                                </p>
+                              </div>
+                            )}
                         </div>
-                        {errors.outVehicleMeterImage && (
-                          <p className="text-red-500 text-sm mt-2 font-medium">
-                            {errors.outVehicleMeterImage}
-                          </p>
-                        )}
+
+                        <div className="space-y-2">
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">
+                            Vehicle Meter Image (OUT)
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) =>
+                                handleFileChange(e, "outVehicleMeter")
+                              }
+                              className="hidden"
+                              id="outVehicleMeterUpload"
+                            />
+                            <label
+                              htmlFor="outVehicleMeterUpload"
+                              className="flex items-center justify-center w-full px-4 py-4 bg-white border-2 border-dashed border-slate-300 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
+                            >
+                              <div className="text-center">
+                                <Upload className="h-6 w-6 text-slate-400 mx-auto mb-1" />
+                                <p className="text-slate-600 text-sm">
+                                  {formData.outVehicleMeterImageName ||
+                                    "Upload OUT meter image"}
+                                </p>
+                              </div>
+                            </label>
+                          </div>
+                          {errors.outVehicleMeterImage && (
+                            <p className="text-red-500 text-sm mt-2 font-medium">
+                              {errors.outVehicleMeterImage}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Bus Fields */}
                 {formData.outVehicleType === "Bus" && (
@@ -1592,61 +1585,61 @@ const Travel = () => {
                 {/* Rent Car/Bike Fields */}
                 {(formData.outVehicleType === "Rent Car" ||
                   formData.outVehicleType === "Rent Bike") && (
-                  <div className="grid gap-4 lg:grid-cols-2 mb-4">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-slate-700 mb-3">
-                        Bill Receipt
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) =>
-                            handleFileChange(e, "outBillReceipt")
-                          }
-                          className="hidden"
-                          id="outBillReceiptUpload"
-                        />
-                        <label
-                          htmlFor="outBillReceiptUpload"
-                          className="flex items-center justify-center w-full px-4 py-4 bg-white border-2 border-dashed border-slate-300 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
-                        >
-                          <div className="text-center">
-                            <Upload className="h-6 w-6 text-slate-400 mx-auto mb-1" />
-                            <p className="text-slate-600 text-sm">
-                              {formData.outBillReceiptName ||
-                                "Upload bill receipt"}
-                            </p>
-                          </div>
+                    <div className="grid gap-4 lg:grid-cols-2 mb-4">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-700 mb-3">
+                          Bill Receipt
                         </label>
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              handleFileChange(e, "outBillReceipt")
+                            }
+                            className="hidden"
+                            id="outBillReceiptUpload"
+                          />
+                          <label
+                            htmlFor="outBillReceiptUpload"
+                            className="flex items-center justify-center w-full px-4 py-4 bg-white border-2 border-dashed border-slate-300 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
+                          >
+                            <div className="text-center">
+                              <Upload className="h-6 w-6 text-slate-400 mx-auto mb-1" />
+                              <p className="text-slate-600 text-sm">
+                                {formData.outBillReceiptName ||
+                                  "Upload bill receipt"}
+                              </p>
+                            </div>
+                          </label>
+                        </div>
+                        {errors.outBillReceipt && (
+                          <p className="text-red-500 text-sm mt-2 font-medium">
+                            {errors.outBillReceipt}
+                          </p>
+                        )}
                       </div>
-                      {errors.outBillReceipt && (
-                        <p className="text-red-500 text-sm mt-2 font-medium">
-                          {errors.outBillReceipt}
-                        </p>
-                      )}
-                    </div>
 
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-slate-700 mb-3">
-                        Amount
-                      </label>
-                      <input
-                        type="number"
-                        name="outRentAmount"
-                        value={formData.outRentAmount}
-                        onChange={handleInputChange}
-                        placeholder="Enter rent amount"
-                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium"
-                      />
-                      {errors.outRentAmount && (
-                        <p className="text-red-500 text-sm mt-2 font-medium">
-                          {errors.outRentAmount}
-                        </p>
-                      )}
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-700 mb-3">
+                          Amount
+                        </label>
+                        <input
+                          type="number"
+                          name="outRentAmount"
+                          value={formData.outRentAmount}
+                          onChange={handleInputChange}
+                          placeholder="Enter rent amount"
+                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium"
+                        />
+                        {errors.outRentAmount && (
+                          <p className="text-red-500 text-sm mt-2 font-medium">
+                            {errors.outRentAmount}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* OUT Remarks Field */}
                 <div className="space-y-2 mb-4">

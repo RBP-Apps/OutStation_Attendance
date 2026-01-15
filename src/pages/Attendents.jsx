@@ -127,8 +127,8 @@ const AttendanceSummaryCard = ({
       userRole?.toLowerCase() === "admin"
         ? attendanceData
         : attendanceData.filter(
-            (entry) => entry.salesPersonName === salesPersonName
-          );
+          (entry) => entry.salesPersonName === salesPersonName
+        );
 
     // Calculate statistics
     let targetMonth, targetYear;
@@ -477,9 +477,8 @@ const AttendanceHistory = ({
 
     // Create proper Excel content with XML format
     const currentDate = new Date().toLocaleDateString();
-    const fileName = `Attendance_History_${
-      new Date().toISOString().split("T")[0]
-    }`;
+    const fileName = `Attendance_History_${new Date().toISOString().split("T")[0]
+      }`;
 
     // Create Excel XML structure
     let excelContent = `<?xml version="1.0"?>
@@ -502,31 +501,30 @@ const AttendanceHistory = ({
     filteredData.forEach((row) => {
       excelContent += `
         <Row>
-          <Cell><Data ss:Type="String">${
-            row.salesPersonName || "N/A"
-          }</Data></Cell>
+          <Cell><Data ss:Type="String">${row.salesPersonName || "N/A"
+        }</Data></Cell>
           <Cell><Data ss:Type="String">${row.dateTime || "N/A"}</Data></Cell>
           <Cell><Data ss:Type="String">${row.status || "N/A"}</Data></Cell>
           <Cell><Data ss:Type="String">${row.mapLink || "N/A"}</Data></Cell>
           <Cell><Data ss:Type="String">${(row.address || "N/A").replace(
-            /[<>&"']/g,
-            function (match) {
-              switch (match) {
-                case "<":
-                  return "&lt;";
-                case ">":
-                  return "&gt;";
-                case "&":
-                  return "&amp;";
-                case '"':
-                  return "&quot;";
-                case "'":
-                  return "&apos;";
-                default:
-                  return match;
-              }
+          /[<>&"']/g,
+          function (match) {
+            switch (match) {
+              case "<":
+                return "&lt;";
+              case ">":
+                return "&gt;";
+              case "&":
+                return "&amp;";
+              case '"':
+                return "&quot;";
+              case "'":
+                return "&apos;";
+              default:
+                return match;
             }
-          )}</Data></Cell>
+          }
+        )}</Data></Cell>
         </Row>`;
     });
 
@@ -760,15 +758,16 @@ const AttendanceHistory = ({
                     </td>
                     <td className="w-24 px-4 py-3 border-r border-slate-200/50">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          record.status === "IN"
-                            ? "bg-green-100 text-green-800"
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${record.status === "IN"
+                          ? "bg-green-100 text-green-800"
+                          : record.status === 'MID'
+                            ? "bg-blue-100 text-blue-800"
                             : record.status === "OUT"
-                            ? "bg-red-100 text-red-800"
-                            : record.status === "Leave"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
+                              ? "bg-red-100 text-red-800"
+                              : record.status === "Leave"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-gray-100 text-gray-800"
+                          }`}
                       >
                         {record.status || "N/A"}
                       </span>
@@ -1105,7 +1104,7 @@ const Attendance = () => {
       (record) =>
         record.salesPersonName === salesPersonName &&
         record.dateTime?.split(" ")[0].toString() ===
-          formatDateDDMMYYYY(new Date())
+        formatDateDDMMYYYY(new Date())
     );
 
     if (userRecords.length === 0) {
@@ -1141,7 +1140,7 @@ const Attendance = () => {
         formData.startDate &&
         formData.endDate &&
         new Date(formData.endDate + "T00:00:00") <
-          new Date(formData.startDate + "T00:00:00")
+        new Date(formData.startDate + "T00:00:00")
       ) {
         newErrors.endDate = "End date cannot be before start date";
       }
@@ -1170,6 +1169,14 @@ const Attendance = () => {
       const jsonStart = text.indexOf("{");
       const jsonEnd = text.lastIndexOf("}") + 1;
       const jsonData = text.substring(jsonStart, jsonEnd);
+
+      if (!jsonData || jsonStart === -1) {
+        console.error("❌ No valid JSON found in response. Full text:", text);
+        setAttendance([]);
+        setIsLoadingHistory(false);
+        return;
+      }
+
       const data = JSON.parse(jsonData);
 
       // console.log(data,"attendance sheet data")
@@ -1242,15 +1249,15 @@ const Attendance = () => {
         (entry) =>
           entry.salesPersonName === salesPersonName &&
           entry.dateTime?.split(" ")[0].toString() ===
-            formatDateDDMMYYYY(new Date())
+          formatDateDDMMYYYY(new Date())
       );
 
       const filteredHistoryData =
         userRole.toLowerCase() === "admin"
           ? formattedHistory
           : formattedHistory.filter(
-              (entry) => entry.salesPersonName === salesPersonName
-            );
+            (entry) => entry.salesPersonName === salesPersonName
+          );
 
       filteredHistory.sort((a, b) => {
         const parseGvizDate = (dateString) => {
@@ -1403,7 +1410,7 @@ const Attendance = () => {
     }
 
     if (
-      (formData.status === "IN" || formData.status === "OUT") &&
+      (formData.status === "IN" || formData.status === "OUT" || formData.status === "MID") &&
       !formData.image
     ) {
       showToast("Please capture a photo before submitting", "error");
@@ -1419,11 +1426,26 @@ const Attendance = () => {
       }
     }
 
+    if (formData?.status === "MID") {
+      const indata = attendance.filter((item) => item.status === "IN");
+      if (indata.length === 0) {
+        showToast("Please mark IN first before selecting MID", "error");
+        return;
+      }
+    }
+
     if (formData?.status === "OUT") {
       const indata = attendance.filter((item) => item.status === "IN");
+      const middata = attendance.filter((item) => item.status === "MID");
       const outdata = attendance.filter((item) => item.status === "OUT");
+
       if (indata.length === 0) {
-        showToast("First In", "error");
+        showToast("Please mark IN first", "error");
+        return;
+      }
+
+      if (middata.length === 0) {
+        showToast("Please mark MID before selecting OUT", "error");
         return;
       }
 
@@ -1443,7 +1465,7 @@ const Attendance = () => {
         currentLocation = await getCurrentLocation();
 
         if (
-          (formData.status === "IN" || formData.status === "OUT") &&
+          (formData.status === "IN" || formData.status === "OUT" || formData.status === "MID") &&
           InFiled === "yes"
         ) {
           const distance = calculateDistance(
@@ -1487,7 +1509,7 @@ const Attendance = () => {
       if (
         formData.image &&
         formData.image.startsWith("data:") &&
-        (formData.status === "IN" || formData.status === "OUT")
+        (formData.status === "IN" || formData.status === "OUT" || formData.status === "MID")
       ) {
         imageUrl = await uploadImageToDrive(
           formData.image,
@@ -1499,11 +1521,11 @@ const Attendance = () => {
       const timestamp = formatDateTime(currentDate);
 
       const dateForAttendance =
-        formData.status === "IN" || formData.status === "OUT"
+        formData.status === "IN" || formData.status === "OUT" || formData.status === "MID"
           ? formatDateTime(currentDate)
           : formData.startDate
-          ? formatDateTime(new Date(formData.startDate + "T00:00:00"))
-          : "";
+            ? formatDateTime(new Date(formData.startDate + "T00:00:00"))
+            : "";
 
       const endDateForLeave = formData.endDate
         ? formatDateTime(new Date(formData.endDate + "T00:00:00"))
@@ -1535,9 +1557,11 @@ const Attendance = () => {
       const successMessage =
         formData.status === "IN"
           ? "Check-in successful!"
-          : formData.status === "OUT"
-          ? "Check-out successful!"
-          : "Leave application submitted successfully!";
+          : formData.status === "MID"
+            ? "Mid check successful!"
+            : formData.status === "OUT"
+              ? "Check-out successful!"
+              : "Leave application submitted successfully!";
       showToast(successMessage, "success");
 
       // Reset form IMMEDIATELY
@@ -1590,8 +1614,8 @@ const Attendance = () => {
           formData.status === "IN"
             ? "Check-in successful!"
             : formData.status === "OUT"
-            ? "Check-out successful!"
-            : "Leave application submitted successfully!";
+              ? "Check-out successful!"
+              : "Leave application submitted successfully!";
         showToast(legacySuccessMessage, "success");
 
         setFormData({
@@ -1630,8 +1654,8 @@ const Attendance = () => {
           formData.status === "IN"
             ? "Check-in successful!"
             : formData.status === "OUT"
-            ? "Check-out successful!"
-            : "Leave application submitted successfully!";
+              ? "Check-out successful!"
+              : "Leave application submitted successfully!";
         showToast(legacySuccessMessage, "success");
 
         setFormData({
@@ -1936,12 +1960,12 @@ const Attendance = () => {
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-white border rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium ${
-                    errors.status ? "border-red-300" : "border-slate-200"
-                  }`}
+                  className={`w-full px-4 py-3 bg-white border rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-slate-700 font-medium ${errors.status ? "border-red-300" : "border-slate-200"
+                    }`}
                 >
                   <option value="">Select status</option>
                   <option value="IN">IN</option>
+                  <option value="MID">MID</option>
                   <option value="OUT">OUT</option>
                   <option value="Leave">Leave</option>
                 </select>
@@ -1953,7 +1977,7 @@ const Attendance = () => {
               </div>
             </div>
 
-            {(formData.status === "IN" || formData.status === "OUT") && (
+            {(formData.status === "IN" || formData.status === "OUT" || formData.status === "MID") && (
               <>
                 {/* 
                   SIMPLE MOBILE APPROACH: Visible file input with label styling.

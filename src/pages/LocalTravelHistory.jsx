@@ -22,9 +22,8 @@ const LocalTravelHistory = () => {
 
   const showToast = (message, type = "success") => {
     const toast = document.createElement("div");
-    toast.className = `fixed top-4 right-4 p-4 rounded-md text-white z-50 ${
-      type === "success" ? "bg-green-500" : "bg-red-500"
-    }`;
+    toast.className = `fixed top-4 right-4 p-4 rounded-md text-white z-50 ${type === "success" ? "bg-green-500" : "bg-red-500"
+      }`;
     toast.textContent = message;
     document.body.appendChild(toast);
 
@@ -37,10 +36,10 @@ const LocalTravelHistory = () => {
 
   const formatDate = (dateString) => {
     if (!dateString || dateString.toString().trim() === "") return "-";
-    
+
     try {
       const dateStr = dateString.toString();
-      
+
       // Handle Google Sheets Date(YYYY,M,D) format
       if (dateStr.startsWith('Date(') && dateStr.endsWith(')')) {
         const dateContent = dateStr.substring(5, dateStr.length - 1);
@@ -77,7 +76,7 @@ const LocalTravelHistory = () => {
         const month = parseInt(parts[0]);
         const day = parseInt(parts[1]);
         const year = parseInt(parts[2]);
-        
+
         if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
           const date = new Date(year > 99 ? year : 2000 + year, month, day);
           if (!isNaN(date.getTime())) {
@@ -116,14 +115,14 @@ const LocalTravelHistory = () => {
   // Convert DD/MM/YY to Date object for comparison
   const parseLocalTravelDate = (dateStr) => {
     if (!dateStr || dateStr === "-") return null;
-    
+
     try {
       const parts = dateStr.split('/');
       if (parts.length === 3) {
         const day = parseInt(parts[0]);
         const month = parseInt(parts[1]) - 1; // Months are 0-indexed
         const year = parseInt(parts[2]) + 2000; // Assuming YY format, convert to YYYY
-        
+
         return new Date(year, month, day);
       }
       return null;
@@ -258,8 +257,8 @@ const LocalTravelHistory = () => {
         userRole === "admin"
           ? formattedHistory
           : formattedHistory.filter(
-              (entry) => entry.personName === salesPersonName
-            );
+            (entry) => entry.personName === salesPersonName
+          );
 
       filteredHistory.sort((a, b) => {
         return b.originalIndex - a.originalIndex;
@@ -345,7 +344,7 @@ const LocalTravelHistory = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-         <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-5">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-5">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
               <div>
                 <h1 className="text-2xl font-bold text-white flex items-center">
@@ -364,7 +363,7 @@ const LocalTravelHistory = () => {
                 <Calendar className="h-5 w-5 text-gray-500" />
                 <span className="text-sm font-medium text-gray-700">Filter by Date:</span>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-3 flex-1">
                 <div className="flex items-center gap-2">
                   <label className="text-sm text-gray-600 whitespace-nowrap">From:</label>
@@ -375,7 +374,7 @@ const LocalTravelHistory = () => {
                     className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <label className="text-sm text-gray-600 whitespace-nowrap">To:</label>
                   <input
@@ -386,7 +385,7 @@ const LocalTravelHistory = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="flex gap-2">
                 {(filterStartDate || filterEndDate) && (
                   <button
@@ -430,7 +429,7 @@ const LocalTravelHistory = () => {
               </div>
             ) : (
               <div className="space-y-4">
-               {displayLocalTravels.slice(0, -1).map((localTravel, index) => (
+                {displayLocalTravels.slice(0, -1).map((localTravel, index) => (
                   <div key={index} className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                     {/* Main Row - Always Visible with Updated Header */}
                     <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
@@ -469,8 +468,8 @@ const LocalTravelHistory = () => {
                           onClick={() => toggleRowExpansion(index)}
                           className="ml-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
                         >
-                          {expandedRows[index] ? 
-                            <ChevronUp className="h-5 w-5" /> : 
+                          {expandedRows[index] ?
+                            <ChevronUp className="h-5 w-5" /> :
                             <ChevronDown className="h-5 w-5" />
                           }
                         </button>
@@ -526,7 +525,7 @@ const LocalTravelHistory = () => {
                                 {renderImageButton(localTravel.vehicleImages, "IN Images")}
                               </div>
                             </div>
-                            
+
                             {localTravel.outImage && (
                               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                                 <div className="flex justify-between items-center">
@@ -544,7 +543,7 @@ const LocalTravelHistory = () => {
                         {/* Admin Information */}
                         {userRole === "admin" && (
                           <div className="pt-4 border-t border-gray-200">
-                            <p className="text-sm font-medium text-gray-500">Submitted by: 
+                            <p className="text-sm font-medium text-gray-500">Submitted by:
                               <span className="text-gray-900 ml-1">{localTravel.personName}</span>
                             </p>
                           </div>

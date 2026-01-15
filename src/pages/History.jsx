@@ -22,9 +22,8 @@ const TravelHistory = () => {
 
   const showToast = (message, type = "success") => {
     const toast = document.createElement("div");
-    toast.className = `fixed top-4 right-4 p-4 rounded-md text-white z-50 ${
-      type === "success" ? "bg-green-500" : "bg-red-500"
-    }`;
+    toast.className = `fixed top-4 right-4 p-4 rounded-md text-white z-50 ${type === "success" ? "bg-green-500" : "bg-red-500"
+      }`;
     toast.textContent = message;
     document.body.appendChild(toast);
 
@@ -37,10 +36,10 @@ const TravelHistory = () => {
 
   const formatDate = (dateString) => {
     if (!dateString || dateString.toString().trim() === "") return "-";
-    
+
     try {
       const dateStr = dateString.toString();
-      
+
       // Handle Google Sheets Date(YYYY,M,D) format
       if (dateStr.startsWith('Date(') && dateStr.endsWith(')')) {
         const dateContent = dateStr.substring(5, dateStr.length - 1);
@@ -77,7 +76,7 @@ const TravelHistory = () => {
         const month = parseInt(parts[0]);
         const day = parseInt(parts[1]);
         const year = parseInt(parts[2]);
-        
+
         if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
           const date = new Date(year > 99 ? year : 2000 + year, month, day);
           if (!isNaN(date.getTime())) {
@@ -116,14 +115,14 @@ const TravelHistory = () => {
   // Convert DD/MM/YY to Date object for comparison
   const parseTravelDate = (dateStr) => {
     if (!dateStr || dateStr === "-") return null;
-    
+
     try {
       const parts = dateStr.split('/');
       if (parts.length === 3) {
         const day = parseInt(parts[0]);
         const month = parseInt(parts[1]) - 1; // Months are 0-indexed
         const year = parseInt(parts[2]) + 2000; // Assuming YY format, convert to YYYY
-        
+
         return new Date(year, month, day);
       }
       return null;
@@ -134,40 +133,40 @@ const TravelHistory = () => {
   };
 
   const normalizeDate = (date) => {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-};
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  };
 
-const applyDateFilter = () => {
-  if (!filterStartDate && !filterEndDate) {
-    setFilteredTravels(travels);
-    setIsFiltering(false);
-    return;
-  }
-
-  const startDate = filterStartDate ? normalizeDate(new Date(filterStartDate)) : null;
-  const endDate = filterEndDate ? normalizeDate(new Date(filterEndDate)) : null;
-
-  const filtered = travels.filter(travel => {
-    const travelDate = parseTravelDate(travel.travelDate);
-    if (!travelDate) return false;
-
-    const normalizedTravelDate = normalizeDate(travelDate);
-
-    if (startDate && endDate) {
-      // inclusive range (includes start and end)
-      return normalizedTravelDate >= startDate && normalizedTravelDate <= endDate;
-    } else if (endDate) {
-      // only end date → match exactly that date
-      return normalizedTravelDate.getTime() === endDate.getTime();
-    } else {
-      // only start date → no filter
-      return true;
+  const applyDateFilter = () => {
+    if (!filterStartDate && !filterEndDate) {
+      setFilteredTravels(travels);
+      setIsFiltering(false);
+      return;
     }
-  });
 
-  setFilteredTravels(filtered);
-  setIsFiltering(true);
-};
+    const startDate = filterStartDate ? normalizeDate(new Date(filterStartDate)) : null;
+    const endDate = filterEndDate ? normalizeDate(new Date(filterEndDate)) : null;
+
+    const filtered = travels.filter(travel => {
+      const travelDate = parseTravelDate(travel.travelDate);
+      if (!travelDate) return false;
+
+      const normalizedTravelDate = normalizeDate(travelDate);
+
+      if (startDate && endDate) {
+        // inclusive range (includes start and end)
+        return normalizedTravelDate >= startDate && normalizedTravelDate <= endDate;
+      } else if (endDate) {
+        // only end date → match exactly that date
+        return normalizedTravelDate.getTime() === endDate.getTime();
+      } else {
+        // only start date → no filter
+        return true;
+      }
+    });
+
+    setFilteredTravels(filtered);
+    setIsFiltering(true);
+  };
 
 
 
@@ -181,9 +180,9 @@ const applyDateFilter = () => {
   };
 
   // Apply filter automatically when dates change
-useEffect(() => {
-  applyDateFilter();
-}, [ filterEndDate]);
+  useEffect(() => {
+    applyDateFilter();
+  }, [filterEndDate]);
 
 
   const fetchTravelHistory = async () => {
@@ -238,7 +237,7 @@ useEffect(() => {
           try {
             const dates = foodingDates.toString().split(',').map(d => formatDate(d.trim())).filter(d => d && d !== "-");
             const links = foodingBillLinks.toString().split(',').map(l => l.trim()).filter(l => l);
-            
+
             const minLength = Math.min(dates.length, links.length);
             for (let i = 0; i < minLength; i++) {
               if (dates[i] && links[i]) {
@@ -283,8 +282,8 @@ useEffect(() => {
         userRole === "admin"
           ? formattedHistory
           : formattedHistory.filter(
-              (entry) => entry.personName === salesPersonName
-            );
+            (entry) => entry.personName === salesPersonName
+          );
 
       filteredHistory.sort((a, b) => {
         return b.originalIndex - a.originalIndex;
@@ -383,7 +382,7 @@ useEffect(() => {
                 <Calendar className="h-5 w-5 text-gray-500" />
                 <span className="text-sm font-medium text-gray-700">Filter by Date:</span>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-3 flex-1">
                 <div className="flex items-center gap-2">
                   <label className="text-sm text-gray-600 whitespace-nowrap">From:</label>
@@ -394,7 +393,7 @@ useEffect(() => {
                     className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <label className="text-sm text-gray-600 whitespace-nowrap">To:</label>
                   <input
@@ -405,7 +404,7 @@ useEffect(() => {
                   />
                 </div>
               </div>
-              
+
               <div className="flex gap-2">
                 {(filterStartDate || filterEndDate) && (
                   <button
@@ -480,8 +479,8 @@ useEffect(() => {
                           onClick={() => toggleRowExpansion(index)}
                           className="ml-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
                         >
-                          {expandedRows[index] ? 
-                            <ChevronUp className="h-5 w-5" /> : 
+                          {expandedRows[index] ?
+                            <ChevronUp className="h-5 w-5" /> :
                             <ChevronDown className="h-5 w-5" />
                           }
                         </button>
@@ -528,17 +527,17 @@ useEffect(() => {
                               <h5 className="text-sm font-semibold text-blue-900 mb-2">Stay Bill</h5>
                               {renderFileUploadStatus(travel.stayBillUploaded, travel.stayBillLink, "Stay Bill")}
                             </div>
-                            
+
                             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                               <h5 className="text-sm font-semibold text-green-900 mb-2">Travel Receipt</h5>
                               {renderFileUploadStatus(travel.travelReceiptUploaded, travel.travelReceiptLink, "Travel Receipt")}
                             </div>
-                            
+
                             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                               <h5 className="text-sm font-semibold text-purple-900 mb-2">Local Travel Receipt</h5>
                               {renderFileUploadStatus(travel.localTravelReceiptUploaded, travel.localTravelReceiptLink, "Local Travel Receipt")}
                             </div>
-                            
+
                             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                               <h5 className="text-sm font-semibold text-orange-900 mb-2">Return Ticket</h5>
                               {renderFileUploadStatus(travel.returnTicketUploaded, travel.returnTicketLink, "Return Ticket")}
@@ -579,7 +578,7 @@ useEffect(() => {
                         {/* Admin Information */}
                         {userRole === "Admin" && (
                           <div className="pt-4 border-t border-gray-200">
-                            <p className="text-sm font-medium text-gray-500">Submitted by: 
+                            <p className="text-sm font-medium text-gray-500">Submitted by:
                               <span className="text-gray-900 ml-1">{travel.personName}</span>
                             </p>
                           </div>

@@ -41,7 +41,7 @@ const Advance = () => {
             ...prev,
             salesPersonName: salesPersonName
         }));
-        
+
         // ✅ FIXED: Auto-show for admin, but allow users to see form
         if (isAdmin) {
             setShowHistory(true);
@@ -51,11 +51,10 @@ const Advance = () => {
 
     const showToast = (message, type = "success") => {
         const toast = document.createElement("div");
-        toast.className = `fixed top-4 right-4 p-4 rounded-md text-white z-50 ${
-            type === "success" ? "bg-green-500" : 
-            type === "info" ? "bg-blue-500" : 
-            "bg-red-500"
-        }`;
+        toast.className = `fixed top-4 right-4 p-4 rounded-md text-white z-50 ${type === "success" ? "bg-green-500" :
+            type === "info" ? "bg-blue-500" :
+                "bg-red-500"
+            }`;
         toast.textContent = message;
         document.body.appendChild(toast);
 
@@ -189,7 +188,7 @@ const Advance = () => {
         } catch (error) {
             console.error("Submit error:", error);
             showToast("Request submitted. Please check the sheet to confirm.", "info");
-            
+
             setFormData({
                 salesPersonName: salesPersonName,
                 fromLocation: "",
@@ -212,19 +211,19 @@ const Advance = () => {
         try {
             setIsLoadingHistory(true);
             setAdminHistory([]);
-            
+
             console.log("🔍 Fetching admin completed history");
 
             const advanceSheetUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=Advance`;
-            
+
             const response = await fetch(advanceSheetUrl);
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const text = await response.text();
-            
+
             const jsonStart = text.indexOf("{");
             const jsonEnd = text.lastIndexOf("}") + 1;
             const jsonData = text.substring(jsonStart, jsonEnd);
@@ -239,11 +238,11 @@ const Advance = () => {
 
             const rows = data.table.rows;
             const dataRows = rows.slice(1);
-            
+
             const formattedHistory = dataRows
                 .map((row, arrayIndex) => {
                     const actualSheetRow = arrayIndex + 2;
-                    
+
                     const timestamp = row.c?.[0]?.v || '';
                     const serialNumber = row.c?.[1]?.v || '';
                     const personName = row.c?.[2]?.v || '';
@@ -287,22 +286,22 @@ const Advance = () => {
                     if (!item.serialNumber || !item.salesPersonName || !item.fromLocation || !item.toLocation) {
                         return false;
                     }
-                    
+
                     // ✅ FIXED: Show completed requests (both planned and actual not null)
                     const hasPlanned = item.planned && item.planned !== '' && item.planned !== null;
                     const hasActual = item.actual && item.actual !== '' && item.actual !== null;
                     const isCompleted = hasPlanned && hasActual;
-                    
+
                     console.log(`Admin History - Serial ${item.serialNumber}: planned="${item.planned}", actual="${item.actual}", isCompleted=${isCompleted}`);
                     return isCompleted;
                 })
                 .sort((a, b) => {
                     const serialA = a.serialNumber || '';
                     const serialB = b.serialNumber || '';
-                    
+
                     const numA = parseInt(serialA.split('-')[1] || '0');
                     const numB = parseInt(serialB.split('-')[1] || '0');
-                    
+
                     return numB - numA; // Newest first (DESC)
                 });
 
@@ -324,7 +323,7 @@ const Advance = () => {
         try {
             setIsLoadingHistory(true);
             setAdvanceHistory([]);
-            
+
             if (!salesPersonName || salesPersonName === "Unknown User") {
                 showToast("Please ensure you are properly logged in", "error");
                 return;
@@ -333,15 +332,15 @@ const Advance = () => {
             console.log("🔍 Fetching advance history for:", salesPersonName, "isAdmin:", isAdmin);
 
             const advanceSheetUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=Advance`;
-            
+
             const response = await fetch(advanceSheetUrl);
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const text = await response.text();
-            
+
             const jsonStart = text.indexOf("{");
             const jsonEnd = text.lastIndexOf("}") + 1;
             const jsonData = text.substring(jsonStart, jsonEnd);
@@ -356,11 +355,11 @@ const Advance = () => {
 
             const rows = data.table.rows;
             const dataRows = rows.slice(1);
-            
+
             const formattedHistory = dataRows
                 .map((row, arrayIndex) => {
                     const actualSheetRow = arrayIndex + 2;
-                    
+
                     const timestamp = row.c?.[0]?.v || '';
                     const serialNumber = row.c?.[1]?.v || '';
                     const personName = row.c?.[2]?.v || '';
@@ -403,13 +402,13 @@ const Advance = () => {
                     if (!item.serialNumber || !item.salesPersonName || !item.fromLocation || !item.toLocation) {
                         return false;
                     }
-                    
+
                     if (isAdmin) {
                         // ✅ FIXED: Admin sees pending requests (planned NOT null, actual IS null)
                         const hasPlanned = item.planned && item.planned !== '' && item.planned !== null;
                         const hasActual = item.actual && item.actual !== '' && item.actual !== null;
                         const isPendingForAction = hasPlanned && !hasActual;
-                        
+
                         console.log(`Admin Action - Serial ${item.serialNumber}: planned="${item.planned}", actual="${item.actual}", isPendingForAction=${isPendingForAction}`);
                         return isPendingForAction;
                     } else {
@@ -422,10 +421,10 @@ const Advance = () => {
                 .sort((a, b) => {
                     const serialA = a.serialNumber || '';
                     const serialB = b.serialNumber || '';
-                    
+
                     const numA = parseInt(serialA.split('-')[1] || '0');
                     const numB = parseInt(serialB.split('-')[1] || '0');
-                    
+
                     return numA - numB; // Ascending order
                 });
 
@@ -445,10 +444,10 @@ const Advance = () => {
     // Helper functions for date formatting
     const formatTimestamp = (timestampValue) => {
         if (!timestampValue) return '';
-        
+
         try {
             let date;
-            
+
             if (typeof timestampValue === 'string' && timestampValue.startsWith('Date(') && timestampValue.endsWith(')')) {
                 const dateContent = timestampValue.substring(5, timestampValue.length - 1);
                 const parts = dateContent.split(',').map(part => parseInt(part.trim()));
@@ -459,7 +458,7 @@ const Advance = () => {
             } else {
                 date = new Date(timestampValue);
             }
-            
+
             if (date && !isNaN(date.getTime())) {
                 const day = String(date.getDate()).padStart(2, '0');
                 const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -477,7 +476,7 @@ const Advance = () => {
 
     const formatDate = (dateValue) => {
         if (!dateValue) return '';
-        
+
         try {
             if (typeof dateValue === 'string' && dateValue.startsWith('Date(') && dateValue.endsWith(')')) {
                 const dateContent = dateValue.substring(5, dateValue.length - 1);
@@ -528,7 +527,7 @@ const Advance = () => {
             <div className="max-w-7xl mx-auto space-y-8">
                 {showAdminHistory ? (
                     // Admin History Page
-                    <AdminHistoryPage 
+                    <AdminHistoryPage
                         onBack={() => {
                             setShowAdminHistory(false);
                             setShowHistory(true); // ✅ FIXED: Go back to admin action page
@@ -542,7 +541,7 @@ const Advance = () => {
                     />
                 ) : showHistory ? (
                     // Admin Action Page or User History Page
-                    <AdvanceHistory 
+                    <AdvanceHistory
                         salesPersonName={salesPersonName}
                         onBack={() => setShowHistory(false)} // ✅ FIXED: Users can go back to form
                         isLoading={isLoadingHistory}
@@ -558,7 +557,7 @@ const Advance = () => {
                     />
                 ) : (
                     // ✅ FIXED: User Form (show for non-admin users or when history is not shown)
-                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden h-full flex flex-col">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden h-full flex flex-col">
                         <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-8 py-6">
                             <div className="flex justify-between items-center">
                                 <div>
@@ -837,9 +836,9 @@ const AdminHistoryPage = ({ onBack, isLoading, history, onRefreshHistory, showTo
                         <p className="text-slate-400">Approved and rejected requests will appear here</p>
                     </div>
                 ) : (
-                        <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200 max-h-[600px] overflow-y-auto">
-                    <table className="w-full">
-                    <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+                    <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200 max-h-[600px] overflow-y-auto">
+                        <table className="w-full">
+                            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                                 <tr>
                                     <th className="text-left p-4 font-semibold text-slate-700 border-r border-slate-200">Serial No</th>
                                     <th className="text-left p-4 font-semibold text-slate-700 border-r border-slate-200">Employee</th>
@@ -873,11 +872,10 @@ const AdminHistoryPage = ({ onBack, isLoading, history, onRefreshHistory, showTo
                                             <span className="font-bold text-emerald-600 text-lg">₹{item.advanceAmount}</span>
                                         </td>
                                         <td className="p-4 border-r border-slate-100">
-                                            <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                                                item.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                                            <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${item.status === 'Approved' ? 'bg-green-100 text-green-800' :
                                                 item.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                                                'bg-yellow-100 text-yellow-800'
-                                            }`}>
+                                                    'bg-yellow-100 text-yellow-800'
+                                                }`}>
                                                 {item.status || 'Pending'}
                                             </span>
                                         </td>
@@ -927,17 +925,17 @@ const AdvanceHistory = ({ salesPersonName, onBack, isLoading, history, onRefresh
             showToast("Please select approve or reject", "error");
             return;
         }
-        
+
         if (action.status === 'Rejected' && !action.remarks?.trim()) {
             showToast("Please provide remarks for rejection", "error");
             return;
         }
 
         setIsSubmittingAction(true);
-        
+
         try {
             console.log("🔄 Submitting action for row:", item.originalIndex, "Serial:", item.serialNumber);
-            
+
             const payload = new URLSearchParams({
                 action: "updateAdvanceStatus",
                 rowNumber: item.originalIndex,
@@ -964,13 +962,13 @@ const AdvanceHistory = ({ salesPersonName, onBack, isLoading, history, onRefresh
 
             if (result.success !== false) {
                 showToast(`Request ${action.status.toLowerCase()} successfully!`, "success");
-                
+
                 setActionData(prev => {
                     const newData = { ...prev };
                     delete newData[item.rowIndex];
                     return newData;
                 });
-                
+
                 if (onRefreshHistory) {
                     setTimeout(() => {
                         onRefreshHistory();
@@ -983,13 +981,13 @@ const AdvanceHistory = ({ salesPersonName, onBack, isLoading, history, onRefresh
         } catch (error) {
             console.error("💥 Action submission error:", error);
             showToast("Action submitted. Please check the sheet to confirm.", "info");
-            
+
             setActionData(prev => {
                 const newData = { ...prev };
                 delete newData[item.rowIndex];
                 return newData;
             });
-            
+
             if (onRefreshHistory) {
                 setTimeout(() => {
                     onRefreshHistory();
@@ -1002,7 +1000,7 @@ const AdvanceHistory = ({ salesPersonName, onBack, isLoading, history, onRefresh
 
     return (
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden h-full flex flex-col">
-        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-8 py-6 flex-shrink-0">
+            <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-8 py-6 flex-shrink-0">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         {!isAdmin && (
@@ -1058,7 +1056,7 @@ const AdvanceHistory = ({ salesPersonName, onBack, isLoading, history, onRefresh
                         </p>
                     </div>
                 ) : (
-            <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200 max-h-[600px] overflow-y-auto">
+                    <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200 max-h-[600px] overflow-y-auto">
                         <table className="w-full">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
@@ -1110,11 +1108,10 @@ const AdvanceHistory = ({ salesPersonName, onBack, isLoading, history, onRefresh
                                             <td className="p-4 text-slate-700 border-r border-slate-100">{item.endDate}</td>
                                             {/* <td className="p-4 text-slate-700 text-sm border-r border-slate-100">{item.timestamp}</td> */}
                                             <td className="p-4 border-r border-slate-100">
-                                                <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                                                    item.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                                                <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${item.status === 'Approved' ? 'bg-green-100 text-green-800' :
                                                     item.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                                                    'bg-yellow-100 text-yellow-800'
-                                                }`}>
+                                                        'bg-yellow-100 text-yellow-800'
+                                                    }`}>
                                                     {item.status || 'Pending'}
                                                 </span>
                                             </td>
@@ -1142,7 +1139,7 @@ const AdvanceHistory = ({ salesPersonName, onBack, isLoading, history, onRefresh
                                                             <option value="Approved">Approve</option>
                                                             <option value="Rejected">Reject</option>
                                                         </select>
-                                                        
+
                                                         {currentAction.status === 'Rejected' && (
                                                             <textarea
                                                                 value={currentAction.remarks || ''}
@@ -1152,7 +1149,7 @@ const AdvanceHistory = ({ salesPersonName, onBack, isLoading, history, onRefresh
                                                                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
                                                             />
                                                         )}
-                                                        
+
                                                         {currentAction.status && (
                                                             <button
                                                                 onClick={() => handleActionSubmit(item)}

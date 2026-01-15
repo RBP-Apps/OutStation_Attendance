@@ -80,9 +80,8 @@ const Travel = () => {
 
   const showToast = (message, type = "success") => {
     const toast = document.createElement("div");
-    toast.className = `fixed top-4 right-4 p-4 rounded-md text-white z-50 ${
-      type === "success" ? "bg-green-500" : "bg-red-500"
-    }`;
+    toast.className = `fixed top-4 right-4 p-4 rounded-md text-white z-50 ${type === "success" ? "bg-green-500" : "bg-red-500"
+      }`;
     toast.textContent = message;
     document.body.appendChild(toast);
 
@@ -123,7 +122,7 @@ const Travel = () => {
         mode: "no-cors",
       });
 
-      
+
     } catch (error) {
       console.error("Error fetching travel history:", error);
       showToast("Error loading travel history", "error");
@@ -162,9 +161,9 @@ const Travel = () => {
         body: urlEncodedUploadData,
         mode: "no-cors",
       });
-      
+
       return fileName;
-      
+
     } catch (error) {
       throw error;
     }
@@ -207,7 +206,7 @@ const Travel = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       showToast("Please fix the form errors", "error");
       return;
@@ -277,16 +276,16 @@ const Travel = () => {
       // Upload fooding bills
       let foodingDatesArray = [];
       let foodingLinksArray = [];
-      
+
       for (const [index, entry] of foodingEntries.entries()) {
         if (entry.date && entry.billImage) {
           try {
             const foodingFileName = `fooding_bill_${salesPersonName}_${entry.date}_${index + 1}.${entry.billImage.name.split('.').pop()}`;
             await uploadFileToGoogleDrive(entry.billImage, foodingFileName);
-            
+
             foodingDatesArray.push(entry.date);
             foodingLinksArray.push(`FOODING_BILL_${foodingFileName}`);
-            
+
           } catch (uploadError) {
             console.error(`Error uploading fooding bill ${index + 1}:`, uploadError);
             showToast(`Error uploading fooding bill ${index + 1}. Please try again.`, "error");
@@ -385,7 +384,7 @@ const Travel = () => {
       setIsSubmitting(false);
     }
   };
-  
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -471,7 +470,7 @@ const Travel = () => {
     if (foodingEntries.length > 1) {
       const updatedEntries = foodingEntries.filter((_, i) => i !== index);
       setFoodingEntries(updatedEntries);
-      
+
       // Clear related errors
       const newErrors = { ...errors };
       delete newErrors[`foodingDate${index}`];
@@ -716,32 +715,32 @@ const Travel = () => {
               </div>
             </div>
 
-          {/* 7. Stay Bill - Changed to normal size */}
-<div className="space-y-2">
-  <label className="block text-sm font-semibold text-slate-700 mb-3">
-    Stay Bill Image
-  </label>
-  <div className="relative max-w-sm"> {/* Limit width here */}
-    <input
-      type="file"
-      accept="image/*"
-      onChange={(e) => handleFileChange(e, "stay")}
-      className="hidden"
-      id="stayBillUpload"
-    />
-    <label
-      htmlFor="stayBillUpload"
-      className="flex items-center justify-center w-full px-4 py-4 bg-white border-2 border-dashed border-slate-300 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
-    >
-      <div className="text-center">
-        <Upload className="h-6 w-6 text-slate-400 mx-auto mb-1" />
-        <p className="text-slate-600 text-sm">
-          {formData.stayBillImageName || "Upload stay bill image"}
-        </p>
-      </div>
-    </label>
-  </div>
-</div>
+            {/* 7. Stay Bill - Changed to normal size */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
+                Stay Bill Image
+              </label>
+              <div className="relative max-w-sm"> {/* Limit width here */}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, "stay")}
+                  className="hidden"
+                  id="stayBillUpload"
+                />
+                <label
+                  htmlFor="stayBillUpload"
+                  className="flex items-center justify-center w-full px-4 py-4 bg-white border-2 border-dashed border-slate-300 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
+                >
+                  <div className="text-center">
+                    <Upload className="h-6 w-6 text-slate-400 mx-auto mb-1" />
+                    <p className="text-slate-600 text-sm">
+                      {formData.stayBillImageName || "Upload stay bill image"}
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
 
 
             {/* 8. Fooding Bills Section */}

@@ -240,19 +240,17 @@ const App = () => {
           )}
 
           <div
-            className={`flex flex-col flex-1 overflow-hidden ${
-              isAuthenticated ? "md:ml-64" : ""
-            }`}
+            className={`flex flex-col flex-1 overflow-hidden ${isAuthenticated ? "md:ml-64" : ""
+              }`}
           >
             {notification && (
               <div
-                className={`p-4 text-sm ${
-                  notification.type === "error"
-                    ? "bg-red-100 text-red-700"
-                    : notification.type === "success"
+                className={`p-4 text-sm ${notification.type === "error"
+                  ? "bg-red-100 text-red-700"
+                  : notification.type === "success"
                     ? "bg-green-100 text-green-700"
                     : "bg-blue-100 text-blue-700"
-                }`}
+                  }`}
               >
                 {notification.message}
               </div>
